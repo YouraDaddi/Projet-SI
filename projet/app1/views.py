@@ -846,8 +846,6 @@ def analyze_achats(request):
 
 ##-------------------------YOUSRAAA
 
-
-
 from .models import (
     Centre,
     Produit,
@@ -877,7 +875,6 @@ from .forms import (
    
 )
 from django.db import models
-
 
 def home(request):
     if Centre.objects.count() == 0:
