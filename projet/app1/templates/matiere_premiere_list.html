@@ -1,0 +1,22 @@
+<!-- templates/matiere_premiere_list.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Matiere Premiere List</title>
+</head>
+
+<body>
+    <h2>Matiere Premiere List</h2>
+    <ul>
+        {% for matiere_premiere in matieres_premieres %}
+        <li>{{ matiere_premiere.designation }}
+            <a href="{% url 'matiere_premiere_update' pk=matiere_premiere.pk %}">Update</a> |
+            <a href="{% url 'matiere_premiere_delete' pk=matiere_premiere.pk %}">Delete</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'matiere_premiere_create' %}">Add matiere premiere</a>
+</body>
+
+</html>

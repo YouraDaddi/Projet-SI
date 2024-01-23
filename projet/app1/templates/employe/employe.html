@@ -1,0 +1,90 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Détails de l'employé</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/employe.css' %}?v=2">
+  </head>
+
+  
+  <body>
+    <h2>Détails de l'employé</h2>
+
+    <table border="1">
+      <tr>
+        <th>Code</th>
+        <td>{{ employe.id }}</td>
+      </tr>
+      <tr>
+        <th>Nom</th>
+        <td>{{ employe.nom }}</td>
+      </tr>
+      <tr>
+        <th>Prénom</th>
+        <td>{{ employe.prenom }}</td>
+      </tr>
+      <tr>
+        <th>Adresse</th>
+        <td>{{ employe.adresse }}</td>
+      </tr>
+      <tr>
+        <th>Téléphone</th>
+        <td>{{ employe.telephone }}</td>
+      </tr>
+      <tr>
+        <th>Centre</th>
+        <td>{{ employe.centre.designation }}</td>
+      </tr>
+      <tr>
+        <th>Absence</th>
+        <td>{% if paiement_today and paiement_today.absence %}oui{% else %}non{% endif %}</td>
+    </tr>
+      <tr>
+        <th>Update</th>
+        <td>
+          <button>
+            <a href="{% url 'create_employe' employe.id %}">Edit Employe</a>
+          </button>
+        </td>
+      </tr>
+      <button>
+        <a href="{% url 'calcul_salaire' employe.id%}">calcul_salaire Employe</a>
+      </button>
+
+    </table>
+    <button>
+      <a href="{% url 'paiement_employe' employe.id%}">Payer</a>
+      </button>
+      <h3>Paiements:</h3>
+      <table border="1">
+          <tr>
+              <th>Date</th>
+              <th>Montant</th>
+              <th>Avance(Massrouf)</th>
+          </tr>
+          {% for paie in paiements %}
+              {% if paie.montant != 0 or paie.avance != 0 %}
+                  <tr>
+                      <td>{{ paie.date_paiement }}</td>
+                      <td>{{ paie.montant }}</td>
+                      <td>{{ paie.avance }}</td>
+                  </tr>
+              {% endif %}
+          {% endfor %}
+      </table>
+      
+
+    <br />
+
+    <br />
+    <button>
+    <a href="{% url 'centre' employe.centre.id %}">Retour à la liste des employés</a>
+   </button>
+    <br /><br />
+
+
+  </body>
+</html>

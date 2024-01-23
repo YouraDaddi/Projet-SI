@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Produit to Stock</title>
+</head>
+<body>
+    <h2>Ajouter Produit </h2>
+    <form method="POST" >
+        {% csrf_token %}
+        {{ form.as_p }}
+       <a href="{% url 'stock_state' centre.id %}"> Annuler</a>
+        
+        <input type="submit" value="Valider">
+    </form>
+  
+</body>
+</html>

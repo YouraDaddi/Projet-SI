@@ -1,0 +1,31 @@
+<!-- templates/achats/update_achat.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un Achat</title>
+</head>
+
+<body>
+    <h1>Modifier un Achat</h1>
+
+    <form method="post" action="{% url 'achat_update' pk=achat.pk %}">
+        {% csrf_token %}
+
+        <!-- Hidden input for the primary key -->
+        <input type="hidden" name="pk" value="{{ achat.pk }}">
+
+        <!-- Champs pour le formulaire -->
+        {{ form.as_p }}
+
+        <!-- Bouton de soumission -->
+        <button type="submit">Modifier Achat</button>
+    </form>
+
+    <a href="{% url 'journal_achat' %}">Retour au Journal des Achats</a>
+</body>
+
+</html>

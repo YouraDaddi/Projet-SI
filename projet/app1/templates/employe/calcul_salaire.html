@@ -1,0 +1,17 @@
+<!-- templates/calcul_salaire.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calcul du Salaire</title>
+</head>
+<body>
+
+  <h2>Calcul du Salaire</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Calculer le salaire</button>
+  </form>
+
+</body>
+</html>

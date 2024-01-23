@@ -1,0 +1,76 @@
+<!-- journal_ventes.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <form method="GET" action="{% url 'journal_ventes' %}">
+        <label for="client">Client Name:</label>
+        <input type="text" name="client">
+    
+        <label for="matiere_name">Matiere Name:</label>
+        <input type="text" name="matiere_name">
+    
+        <label for="date_vente">Date Vente:</label>
+        <input type="date" name="date_vente">
+    
+        <input type="submit" value="Filter" class="btn btn-outline-info">
+    </form>
+
+    <h1>Journal des Ventes</h1>
+    <h4><a href=" {% url 'vendre_matiere'  %}"> nouvelle vente </a></h4>
+    <h4><a href=" {% url 'complete_paiement' %}"> compléter paiement </a></h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Numero de Vente</th>
+                <th>Date Vente</th>
+                <th>Client</th>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix Unitaire</th>
+                <th>Montant Total</th>
+                <th>paiement</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vente in ventes %}
+            <tr>
+                <td>{{ vente.id }}</td>
+                <td>{{ vente.date_vente }}</td>
+                <td>{{ vente.client.nom }}</td>
+                <td>{{ vente.produit.designation }}</td>
+                <td>{{ vente.quantite }}</td>
+                <td>{{ vente.prix_unitaire }}</td>
+                <td>{{vente.montant_vente}}</td>
+                <td>
+                    {% if term_encour %}
+                    en cours
+                    {% else %}
+                    terminé
+                    {% endif %}
+                </td>
+                <td><a href="{% url 'vente_update' pk=vente.pk  %}"> Edit </a></td>
+                <td><a href="#" onclick="confirmDelete('{{ vente.id }}')">Supprimer</a></td>
+                <td><a href="{% url 'liste_paiement_vente' vente_id=vente.pk  %}"> voir détail paiement </a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>Total des Ventes: {{ total_ventes }}</p>
+
+    <script>
+        function confirmDelete(venteId) {
+            console.log("vente ID:", venteId);
+            var result = confirm("Voulez-vous vraiment supprimer cet vente?");
+            if (result && venteId) {
+                var deleteUrl = "/delete_vente/" + venteId + "/";
+                window.location.href = deleteUrl;
+            }
+        }
+    </script>
+</body>
+
+</html>

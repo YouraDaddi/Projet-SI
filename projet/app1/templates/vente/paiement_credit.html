@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Règlement du Crédit</title>
+</head>
+<body>
+  
+<h1>Règlement du Crédit pour {{ vente_produit.client.nom }} {{ vente_produit.client.prenom }}</h1>
+
+{% if form %}
+<p>Le montant a payer est de : {{ vente_produit.credit }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Valider le paiement</button>
+  </form>
+{% else %}
+  <p>Le crédit du client est déjà réglé.</p>
+{% endif %}
+
+<a href="{% url 'centre' centre_id=vente_produit.centre.id %}">Retour</a>
+
+</body>
+</html>

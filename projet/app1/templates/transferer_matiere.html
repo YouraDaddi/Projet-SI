@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Ajoutez vos balises head ici -->
+</head>
+
+<body>
+    <h1>Transférer des Matières</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Transférer">
+    </form>
+</body>
+
+</html>

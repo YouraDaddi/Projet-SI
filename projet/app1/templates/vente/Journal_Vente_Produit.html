@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal de vente Produit </title>
+</head>
+<body>
+    <h3>Vente:</h3>
+    <a href="{% url 'vendre_produit' centre_id %}">
+      <button>saisir vente</button>
+    </a><br/>
+    <br />
+   
+    <form method="get" action="">
+      {{ form.as_p }}
+      <button type="submit">Search</button>
+  </form>
+    <br/>
+    <br />
+
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Date_vente</th>
+          <th>Code_Vente</th>
+          <th>Nom_clien</th>
+          <th>Montant Total</th>
+          <th>Credit</th>
+          <th>Reglement</th>
+          <th>Supprimer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vente in ventes %}
+            <tr>
+                <td>{{ vente.date_vente }}</td>
+                <td>{{ vente.code }}</td>
+                <td>{{ vente.client.nom }}</td>
+                <td>{{ vente.montant_total }}</td>
+                <td>{{ vente.credit }}</td>
+                <td><a href="{% url 'reglement_credit_client' vente.id %}"><button>Reglement Credit</button></a></td>
+                <td><a href="{% url 'supprimer_vente' vente.id %}"><button>Supprimer Vente </button></a></td>
+                
+            </tr>
+            
+        {% empty %}
+            <tr>
+                <td colspan="4">Aucune donnée de vente disponible.</td>
+            </tr>
+        {% endfor %}
+        <tr>Montant Total des Ventes: {{ montant_total }}</tr>
+    </tbody>
+      
+    </table>
+    <br /><br />
+    <a href="{% url 'magasin' %}">
+      <button>Retourner vers la page magasin</button>
+    </a>
+   
+    <a href="{% url 'Journal_Vente_Produit' centre.id %}">
+      <button>Refresh</button>
+    </a>
+</body>
+</html>

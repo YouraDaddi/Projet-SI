@@ -1,0 +1,74 @@
+<!-- etat_stock.html -->
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+    <!-- link to compiled css file -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+
+<body>
+    <form method="GET" action="{% url 'etat_stock' %}">
+        <label for="supplier_name">Supplier Name:</label>
+        <input type="text" name="supplier_name">
+
+
+
+        <label for="matiere_name">matiere Name:</label>
+        <input type="text" name="matiere_name">
+
+        <label for="date_achat">Date d'achat:</label>
+        <input type="date" name="date_achat">
+
+
+        <input type="submit" value="Filter" class="btn btn-outline-info">
+        <button type="button" class="btn"><a href="{% url 'etat_stock' %}">refresh</a></button>
+    </form>
+
+
+
+    <h1>Etat stock</h1>
+    <!-- <p>Total Achat: {{ total_achat }}</p> -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom matiere</th>
+                <th>Quantité</th>
+                <th>Nom du Fournisseur</th>
+                <th>prix d'Achat </th>
+                <th>Total </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if stocks %}
+            {% for stock in stocks %}
+            {% if stock.quantite >= 0 %}
+            <tr style="{% if stock.quantite < 10 %} background-color: orange; {% endif %}">
+                <td>{{ stock.matiere.designation }}</td>
+                <td>{{ stock.quantite }}</td>
+                <td>{{ stock.fournisseur.nom }}</td>
+                <td>{{ stock.prix }}</td>
+                <td>{{ total }}</td>
+                <td><a href="#"> Edit </a></td>
+                <td><a href="{% url 'delete_stock' stock_id=stock.pk %}">Delete</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="7">stock vide</td>
+            </tr>
+            {% endif %}
+        </tbody>
+
+
+    </table>
+
+    <a href="{% url 'generate_stock_pdf' %}">Download PDF</a>
+
+    <!-- link to compiled js file -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"> </script>
+</body>
+
+</html>

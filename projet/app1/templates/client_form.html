@@ -1,0 +1,19 @@
+<!-- templates/Client_form.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Client Form</title>
+</head>
+
+<body>
+    <h2>Client Form</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'liste_clients' %}">Back to Client List</a>
+</body>
+
+</html>

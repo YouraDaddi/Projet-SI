@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supprimer la vente {{ vente.code }}</title>
+</head>
+<body>
+    <h1>Supprimer la vente {{ vente.code }}</h1>
+
+    <p>Êtes-vous sûr de vouloir supprimer cette vente ?</p>
+
+    <form method="post" action="">
+        {% csrf_token %}
+        <input type="submit" value="Confirmer la suppression">
+    </form>
+    </br> </br>
+    <a href="{% url 'Journal_Vente_Produit' vente.centre.id %}">Retour à la liste des ventes</a>
+</body>
+</html>

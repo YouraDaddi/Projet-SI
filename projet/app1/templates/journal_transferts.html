@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Ajoutez vos balises head ici -->
+</head>
+
+<body>
+    <h1>Journal des Transferts</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Date Transfert</th>
+                <th>Centre Destination</th>
+                <th>Matiere</th>
+                <th>Quantité</th>
+                <th>Coût Transfert</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transfert in transferts %}
+            <tr>
+                <td>{{ transfert.date_transfert }}</td>
+                <td>{{ transfert.centre_dest.designation }}</td>
+                <td>{{ transfert.matiere.designation }}</td>
+                <td>{{ transfert.quantite }}</td>
+                <td>{{ transfert.cout_transfert }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>Total des Transferts: {{ total_transferts }}</p>
+</body>
+
+</html>

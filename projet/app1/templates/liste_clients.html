@@ -1,0 +1,23 @@
+<!-- templates/fournisseur_list.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fournisseur List</title>
+</head>
+
+<body>
+    <h2>Fournisseur List</h2>
+    <ul>
+        {% for client in clients %}
+        <li>
+            {{ client.nom }} {{ client.prenom }} - {{ client.telephone }}
+            <a href="{% url 'client_update' pk=client.pk %}">Update</a> |
+            <a href="{% url 'client_delete' pk=client.pk %}">Delete</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'client_create' %}">Ajouter un client</a>
+</body>
+
+</html>

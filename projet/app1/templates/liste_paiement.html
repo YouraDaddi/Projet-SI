@@ -1,0 +1,44 @@
+<!-- tous les paiement effectues par le client  -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Paiement List</title>
+</head>
+
+<body>
+    <h2>Paiement List</h2>
+    <h3>crédit de cette vente : {{montant_restant}}</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Numéro Vente</th>
+                <th>Numéro Client </th>
+                <th>Nom client</th>
+                <th>Prénom Client</th>
+                <th>Date paiement</th>
+                <th>Matière vendue</th>
+                <th>Montant payé</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paiement in paiement %}
+            <tr>
+                <td>{{paiement.vente.id}}</td>
+                <td>{{paiement.vente.client.id}}</td>
+                <td>{{paiement.vente.client.nom}}</td>
+                <td>{{paiement.vente.client.prenom }}</td>
+                <td>{{paiement.date_paiement_credit }}</td>
+                <td>{{paiement.vente.matiere.designation }}</td>
+                <td>{{paiement.montant }}</td>
+                <td><a href="{% url 'paiement_update' pk=paiement.pk %}">Update</a></td>
+                <td><a href="{% url 'paiement_delete' pk=paiement.pk %}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </ul>
+    <a href="{% url 'complete_paiement' %}">complete paiement</a>
+</body>
+
+</html>

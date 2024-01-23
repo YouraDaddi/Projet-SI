@@ -1,0 +1,44 @@
+<!-- tous les paiement effectues par le client  -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Paiement List Fournisseur</title>
+</head>
+
+<body>
+    <h2>Paiement List Fournisseur</h2>
+    <h3>crédit de cet achat : {{montant_restant}}</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Numéro Achat</th>
+                <th>Numéro Fournisseur </th>
+                <th>Nom Fournisseur</th>
+                <th>Prénom Fournisseur</th>
+                <th>Date paiement</th>
+                <th>Matière achetée</th>
+                <th>Montant payé</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paiement in paiement %}
+            <tr>
+                <td>{{paiement.achat.id}}</td>
+                <td>{{paiement.achat.fournisseur.id}}</td>
+                <td>{{paiement.achat.fournisseur.nom}}</td>
+                <td>{{paiement.achat.fournisseur.prenom }}</td>
+                <td>{{paiement.date_reglement }}</td>
+                <td>{{paiement.achat.matiere.designation }}</td>
+                <td>{{paiement.montant }}</td>
+                <td><a href="{% url 'paiement_fournisseur_update' pk=paiement.pk %}">Update</a></td>
+                <td><a href="{% url 'paiement_fournisseur_delete' pk=paiement.pk %}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </ul>
+    <a href="{% url 'complete_paiement_fournisseur' %}">complete paiement</a>
+</body>
+
+</html>

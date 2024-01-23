@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Stock Report</title>
+</head>
+
+<body>
+    <h1>Stock Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom matiere</th>
+                <th>Quantité</th>
+                <th>Nom du Fournisseur</th>
+                <th>prix d'Achat </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if stocks %}
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock.matiere.designation }}</td>
+                <td>{{ stock.quantite }}</td>
+                <td>{{ stock.fournisseur.nom }}</td>
+                <td>{{ stock.prix }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td> stock vide </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<!-- templates/dashboard_ventes.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard des Ventes</title>
+</head>
+<body>
+
+    <h1>Dashboard des Ventes</h1>
+
+    <!-- Affichage du graphique -->
+    <img src="data:image/png;base64,{{ chart_image }}" alt="Graphique des ventes mensuelles">
+
+    <!-- Affichage des autres données -->
+    <h2>Total des ventes : {{ total_montant_verse }}</h2>
+
+    <h2>Top Clients :</h2>
+    <ul>
+        {% for client in top_clients %}
+            <li>{{ client.nom }} {{ client.prenom }} - Total des achats : {{ client.total_achats }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Best Sellers :</h2>
+    <ul>
+        {% for seller in best_sellers %}
+            <li>{{ seller.produit__designation }} - Total des ventes : {{ seller.total_quantite }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Affichage du pourcentage de changement mensuel -->
+    <h2>Pourcentage de changement mensuel :</h2>
+    <ul>
+        {% for percentage in monthly_percentage_change %}
+            <li>{{ percentage }}%</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Retour à la page précédente -->
+    <a href="{% url 'magasin' %}">Retour à la page précédente</a>
+
+</body>
+</html>

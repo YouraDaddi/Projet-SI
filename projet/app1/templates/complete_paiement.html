@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <!-- complete le paiement du credit client  -->
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <a href="{% url 'journal_ventes' %}"> Annuler</a>
+        <input type="submit" value="Valider">
+    </form>
+
+
+</body>
+
+</html>

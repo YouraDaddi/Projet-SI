@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard - Analyse des Achats</title>
+</head>
+
+<body>
+    <style>
+    
+    body{
+  display: flex;
+  margin: 0;
+}
+
+.navbar {
+
+background-color: #F1F3F4;
+font-family: 'ABeeZee', sans-serif;
+padding: 2vh;
+
+}
+
+/* .navbar img {
+            height: 40px; 
+            width: auto; 
+            margin-right: 10px; 
+        } */
+
+.navbar ul {
+    list-style: none; /* Remove bullets/dots */
+    padding: 0; 
+    margin: 0; 
+}
+
+.navbar li {
+    margin: 10vh;
+    border-radius: 3vh;
+    padding: 3vh 20vh 3vh 2vh;
+    margin: 2vh ;
+}
+
+
+
+.navbar a {
+    text-decoration: none; /* Remove underline from links */
+    color: #25282C; /* Set link color */
+}
+
+
+/* Change styles when hovering over a list item */
+.navbar li:hover {
+    background-color: #eee; /* Change background color on hover */
+}
+
+/* Change styles when clicking on a list item */
+.navbar li:active {
+    background-color: #FFFFFF; /* Change background color when clicked */
+}
+.navbar a:active {
+    color: #D64BC2; /* Change text color when clicked */
+}
+
+.content{
+    margin: 1vh 2vh;
+}
+
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  z-index: 1;
+}
+
+.dropdown-content a {
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+.dropdown button {
+    border: none;
+    font-size: 3vh;
+}
+
+
+    </style>
+
+
+
+    <nav class="navbar">
+        <ul>
+            <img src="/project1/app1/templates/Logo.png" alt="logo">
+            <li><a href="{% url 'analyze_achats' %}">Dashboard</a></li>
+            <li>
+                <div class="dropdown">
+                    <button class="dropbtn">Tables</button>
+                    <div class="dropdown-content">
+                        <a href="{% url 'liste_clients' %}">Liste clients</a>
+                        <a href="{% url 'fournisseur_list' %}">Liste Fournisseur</a>
+                        <a href="{% url 'matiere_premiere_list' %}">Liste Matières Premières</a>
+                        <a href="{% url 'journal_achat' %}">Journal Achat</a>
+                        <a href="{% url 'journal_ventes' %}">Journal Vente</a>
+                        <a href="{% url 'journal_transferts' %}">Journal Transfert</a>
+                        <a href="{% url 'etat_stock' %}">Etat Stock</a>
+                    </div>
+                </div>
+            </li>
+            <li><a href="{% url 'ajouter_achat' %}">Acheter</a></li>
+            <li><a href="{% url 'vendre_matiere' %}">Vendre</a></li>
+            <li><a href="{% url 'transfert_matiere' %}">Transferer</a></li>
+            <li><a href="#">Account</a></li>
+            <li><a href="#">Security</a></li>
+            <li><a href="#">Help Center</a></li>
+        </ul>
+    </nav>
+    
+    <main class="content">
+    
+    <h1>Dashboard - Analyse des Achats</h1>
+
+    <!-- Monthly Total Achats Chart -->
+    <img src="data:image/png;base64,{{ chart_image }}" alt="Monthly Total Achats Chart">
+
+    <!-- Monthly Total Achats Table -->
+    <h2>Monthly Total Achats Over the Last 12 Months</h2>
+    <table border="1">
+        <tr>
+            <th>Month</th>
+            <th>Total Achats</th>
+        </tr>
+        {% for entry in monthly_total_achats %}
+        <tr>
+            <td>{{ entry.month|date:"F Y" }}</td>
+            <td>{{ entry.total_achats }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Monthly Percentage Change Table -->
+    <h2>Monthly Percentage Change</h2>
+    <table border="1">
+        <tr>
+            <th>Month</th>
+            <th>Percentage Change</th>
+        </tr>
+        {% for change in monthly_percentage_change %}
+        <tr>
+            <td>{{ forloop.counter|date:"F Y" }}</td>
+            <td>{{ change|floatformat:2 }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Top Fournisseurs Table -->
+    <h2>Top Fournisseurs</h2>
+    <table border="1">
+        <tr>
+            <th>Rank</th>
+            <th>Fournisseur</th>
+            <th>Total Achats</th>
+        </tr>
+        {% for fournisseur in top_fournisseurs %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ fournisseur.nom }} {{ fournisseur.prenom }}</td>
+            <td>{{ fournisseur.total_achats }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</main>
+</body>
+
+</html>

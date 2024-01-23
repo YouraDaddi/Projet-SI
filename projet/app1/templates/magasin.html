@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Détails de l'employé</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/magasin.css' %}" />
+
+  </head>
+
+  <body>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Liste des tables</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if centres %}
+        <tr>
+          <th>Liste des centres</th>
+        </tr>
+        {% for Centre in centres %}
+        <tr>
+          <td>
+            <a href="{% url 'centre' Centre.id %}">{{ Centre.designation }}</a>
+          </td>
+        </tr>
+
+        {% endfor %} {% else %}
+        <tr>
+          <td>Aucun Centre</td>
+          <td><a href="{% url 'create_centre' %}"><button > ADD</button></a></td>
+        </tr>
+        {% endif %} {% if clients %}
+        <tr>
+          <th>Liste des clients</th>
+          <td><a href="{% url 'inserer_Client' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+        {% for Client in clients %}
+        <tr>
+          <td><a href="{% url 'client_detail' Client.id %}">{{ Client.nom }}</a></td>
+          <td> <a href="{% url 'supprimer_client' Client.id %}"> <button>Delete</button></a></td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td>Aucun Client</td>
+          <td><a href="{% url 'inserer_Client' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+        {% endif %} {% if fournisseurs %}
+        <tr>
+          <th>Liste des fournisseurs</th>
+          <td><a href="{% url 'inserer' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+        {% for fournisseur in fournisseurs %}
+        <tr>
+          <td><a href="{% url 'inserer' fournisseur.id %}">{{ fournisseur.nom }}</a></td>
+          <td><a  href="{% url 'supprimer_fournisseur' fournisseur.id %}"><button>Delete</button></a></td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <th>Aucun fournisseur</th>
+          <td><a href="{% url 'inserer' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+        {% endif %} {% if employes %}
+        <tr>
+          <th>Liste des employés</th>
+          <td><a href="{% url 'create_employe' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+        {% for Employe in employes %}
+        <tr>
+          <td>
+            <a href="{% url 'detail_employe' Employe.id %}"
+              >{{ Employe.nom }}</a
+            >
+          </td>
+          <td><a href="{% url 'supprimer_employe' Employe.id %}"><button >Delete</button></a></td>
+        </tr>
+          {% endfor %} {% else %}
+        <tr>
+          <th>Aucun Employé</th>
+          <td><a  href="{% url 'create_employe' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+        {% endif %} {% if produits %}
+        <tr>
+          <th>Liste des produits disponibles</th>
+          <td><a href="{% url 'create_produit' %}"><button class="button-add"> ADD </button></a></td>
+        </tr>
+          {% for Produit in produits %}
+        <tr>
+          <td><a  href="{% url 'create_produit' Produit.id %}">{{ Produit.designation }}</a></td>
+          <td><a  href="{% url 'supprimer_produit' Produit.id %}"><button>Delete</button></a></td>
+         </tr>
+        
+       {% endfor %}
+         
+      {% else %}
+        <tr>
+          <th>Aucun Produit</th>
+          <td><a  href="{% url 'create_produit' %}"><button class="button-add">ADD  </button></a></td>
+        </tr>
+      {% endif %}
+
+      </tbody>
+    </table>
+
+    <!-- link to compiled js file -->
+    <!-- <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script> -->
+  </body>
+</html>

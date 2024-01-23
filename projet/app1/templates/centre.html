@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centre</title>
+  <!-- Add your stylesheet link here if needed -->
+</head>
+<body>
+
+  <!-- centre.html -->
+  <h1>Désignation du centre {{ centre.code }} :</h1>
+  <h2>{{ centre.designation }}</h2>
+   
+
+  <!-- Employee Table -->
+  <h3>
+    <p>Liste des employés</p>
+    <a href="{% url 'create_employe' %}"><button class="button-add"> Add Employe </button></a></td>
+  </h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Code Employé</th>
+        <th>Nom Employé</th>
+        <th>ABSENCE</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for employe in employes %}
+      <tr>
+        <td><a href="{% url 'detail_employe' employe.id %}">{{ employe.id }}</a></td>
+        <td>{{ employe.nom }}</td>
+        <td>
+          <form method="post" action="{% url 'modify_absence' employe.id %}">
+            {% csrf_token %}
+            <input type="radio" name="absence" {% if employe.absence %}checked{% endif %}>
+            <button type="submit">ABSENCE</button>
+          </form>
+        </td>
+        <td>
+          {% if not employe.absent %}
+            <button><a href="{% url 'paiement_employe' employe.id %}">Payer</a></button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br />
+
+  <!-- Sales Table -->
+  <h3>Vente :</h3>
+  <a href="{% url 'inserer_Client' %}"><button class="button-add"> Ajouter Client </button></a>
+
+  <a href="{% url 'vendre_produit' centre.id %}">
+    <button>Saisir vente</button>
+  </a>
+
+  <br />
+  <br />
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Date Vente</th>
+        <th>Code Vente</th>
+        <th>Nom Client</th>
+        <th>Montant Total</th>
+        <th>Crédit</th>
+        <th>Règlement</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vente in ventes %}
+      <tr>
+        <td>{{ vente.date_vente }}</td>
+        <td>{{ vente.code }}</td>
+        <td>{{ vente.client.nom }}</td>
+        <td>{{ vente.montant_total }}</td>
+        <td>{{ vente.credit }}</td>
+        <td><a href="{% url 'reglement_credit_client' vente.id %}"><button>Règlement Crédit</button></a></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">Aucune donnée de vente disponible.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br />
+  <br />
+  <a href="{% url 'Journal_Vente_Produit' centre.id %}">
+    <button>Journal des Ventes</button>
+  </a>
+  <br />
+  <br />
+  <a href="{% url 'stock_state' centre.id %}"><button>Voir l'état du stock</button></a>
+
+  <br />
+  <br />
+  <!-- Payment Voucher Table -->
+  <h3>Tableau PV :</h3>
+  <h3>Informations sur Les ventes d'aujourd'huit</h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>code Vente</th>
+        <!-- <th>code employe</th> -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for vente in today_ventes %}
+        <tr>
+          <td>{{ vente.date_vente }}</td>
+          <td>{{ vente.code }}</td>
+        
+     
+        <!-- {% for paiement in today_paiements %}
+          <td>{{ paiement.employe.nom }}</td>
+        </tr>
+          {% endfor %} -->
+
+      {% endfor %}
+      {% if today_ventes|length == 0 and today_paiements|length == 0 %}
+        <tr>
+          <td colspan="3">Aucune transaction aujourd'hui.</td>
+        </tr>
+      {% endif %}
+    </tbody>
+</table>
+<br/><br/>
+    <h3>Informations sur les employes aujourd'huit</h3>
+
+<table border="1">
+    <tr>
+        <th>Code Employé</th>
+       
+        <th>Montant Payé</th>
+    </tr>
+    {% for paiement in today_paiements %}
+    <tr>
+      <td>{{ paiement.employe.id }}</td>
+      <td>{{ paiement.montant }}</td>
+    </tr>
+    {% endfor %}
+</table>
+  </table>
+  <br />
+
+  <a href="{% url 'calcul_ventes_nettes' centre.id %}">
+    <button>Calculer Ventes Nette</button>
+</a>
+
+<br />
+ <a href="{% url 'magasin' %}">
+  <button>Retourner vers la page magasin</button>
+</a>
+
+</body>
+</html>

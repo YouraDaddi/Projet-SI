@@ -1,0 +1,19 @@
+<!-- templates/matiere_premiere_form.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Matiere Premiere Form</title>
+</head>
+
+<body>
+    <h2>Matiere Premiere Form</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'matiere_premiere_list' %}">Back to Matiere Premiere List</a>
+</body>
+
+</html>

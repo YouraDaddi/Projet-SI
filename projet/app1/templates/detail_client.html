@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ client.nom }} - Détails du client</title>
+</head>
+<body>
+    <h1>{{ client.nom }} {{ client.prenom }}</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Code Vente</th>
+                <th>Produit Acheté</th>
+                <th>Quantité</th>
+                <th>Somme Totale</th>
+                <th>Somme Versée</th>
+                <th>Crédit Client</th>
+               
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for vente in ventes %}
+                <tr>
+                    <td>{{ vente.code }}</td>
+                    <td>{{ vente.produit.designation}}</td>
+                    <td>{{ vente.quantite }}</td>
+                    <td>{{ vente.montant_total }}</td>
+                    <td>{{ vente.montant_verse }}</td>
+                    <td>{{ vente.credit }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

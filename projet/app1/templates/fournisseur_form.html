@@ -1,0 +1,19 @@
+<!-- templates/fournisseur_form.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fournisseur Form</title>
+</head>
+
+<body>
+    <h2>Fournisseur Form</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'fournisseur_list' %}">Back to Fournisseur List</a>
+</body>
+
+</html>
