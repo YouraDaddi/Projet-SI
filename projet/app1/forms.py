@@ -96,7 +96,7 @@ from .models import (
 )
 
 class RechercheVenteProduitForm(forms.Form):
-    Recherceh_Nom_Code = forms.CharField(required=False)
+    Recherche_Nom_Code = forms.CharField(required=False)
     date= forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
 
 class RechercheStockProduitForm(forms.Form):

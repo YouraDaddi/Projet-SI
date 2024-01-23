@@ -845,7 +845,22 @@ def analyze_achats(request):
 
 
 ##-------------------------YOUSRAAA
-
+from audioop import reverse
+from django.utils import timezone
+from django.http import HttpResponse 
+from django.shortcuts import get_object_or_404, render, redirect
+from django.db.models import Sum, Q
+from django.http import Http404
+from django.contrib import messages
+from django.db.models import Sum, F, Q
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+import matplotlib.pyplot as plt
+import pandas as pd
+from io import BytesIO
+import base64
+from django.db import transaction
 
 
 from .models import (
@@ -938,8 +953,6 @@ def create_produit(request):
 
 def create_employe(request):
     return create_model(request, EmployeForm)
-
-
 
 # ------------- MODIFICATION DES TABLE -------------------
 def edit_BD(request, pk, model_form, model_name):
@@ -1209,6 +1222,10 @@ def vendre_produit(request, centre_id):
         if form.is_valid():
             vente_produit_instance = form.save(commit=False)
             vente_produit_instance.centre = centre 
+
+            # Set the date_vente field to the current date and time
+            vente_produit_instance.date_vente = form.cleaned_data.get("date")
+
             vente_produit_instance.save()
 
             stock_entry = stock_Produit.objects.get(produit=vente_produit_instance.produit, centre=centre)
@@ -1297,32 +1314,39 @@ def Journal_Vente_Produit(request, centre_id):
     
     ventes = Vente_Produit.objects.filter(centre=centre)
 
-    montant_total = sum(vente.montant_total for vente in ventes) - sum(vente.credit for vente in ventes)
+    montant_total = sum((vente.montant_total or 0) for vente in ventes) - sum((vente.credit or 0) for vente in ventes)
 
-    if form.is_valid():
+    if request.method == 'GET':  # Assuming the form is submitted via POST
+        if form.is_valid():
+            # récupérer les valeurs du formulaire
+            Recherche_Nom_Code = form.cleaned_data.get("Recherche_Nom_Code")
+
+            date = form.cleaned_data.get("date")
+            
+            # filtrer les ventes sur 2 conditions
+    if request.method == 'GET' and form.is_valid():
         # récupérer les valeurs du formulaire
-        Recherceh_Nom_Code = form.cleaned_data.get("Recherceh_Nom_Code")
+        Recherche_Nom_Code = form.cleaned_data.get("Recherche_Nom_Code")
         date = form.cleaned_data.get("date")
+        
         # filtrer les ventes sur 2 conditions
-        if Recherceh_Nom_Code:
-            ventes = ventes.filter(
-                # créer une condition de requête --> nom client contient la valeur dans le formulaire
-                Q(client__nom__icontains=Recherceh_Nom_Code)
-                | Q(code__icontains=Recherceh_Nom_Code)
-            )
-        # Q est une classe en Django qui permet de combiner plusieurs conditions de manière logique.
+
+        if Recherche_Nom_Code:
+            name_filter = ventes.filter(client__nom__icontains=Recherche_Nom_Code)
+            code_filter = ventes.filter(code__icontains=Recherche_Nom_Code)
+            ventes = name_filter.union(code_filter)
+        
         if date:
             ventes = ventes.filter(date_vente=date)
-    
-        # Recalculer le montant total après avoir appliqué les filtres
-        montant_total = sum(vente.montant_total for vente in ventes) - sum(vente.credit for vente in ventes)
+        
+        
 
     return render(
         request,
         "vente/Journal_Vente_Produit.html",
         {"centre": centre, "centre_id": centre_id, "ventes": ventes, "form": form, "montant_total": montant_total},
     )
-
+ 
 def supprimer_vente(request, vente_id):
     vente = get_object_or_404(Vente_Produit, id=vente_id)
 
@@ -1350,7 +1374,7 @@ def stock_state(request, centre_id):
         # If a search term is provided, filter stock_entries based on the product code or designation
         if search_term:
             stock_entries = stock_entries.filter(
-                Q(produit__code__icontains=search_term) | Q(produit__designation__icontains=search_term)
+              Q(produit__designation__icontains=search_term)
             )
 
     return render(request, "vente/stock_state.html", {"stock_entries": stock_entries, "centre": centre, "form": form})
@@ -1418,18 +1442,8 @@ def calcul_ventes_nettes(request, centre_id):
 
     return render(request, 'vente/calcul_ventes_nettes.html', {'form': form, 'centre': centre})
 
+
 #---------------------------SECTION 5 CENTRE --------------------------
-
-from django.db.models import Sum, F, Q
-from django.db.models.functions import TruncMonth
-from django.utils import timezone
-from dateutil.relativedelta import relativedelta
-import matplotlib.pyplot as plt
-import pandas as pd
-from io import BytesIO
-import base64
-
-from .models import Vente_Produit, Client
 
 def analyze_ventes(request):
     # Récupérer toutes les ventes pour les 12 derniers mois

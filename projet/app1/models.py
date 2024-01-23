@@ -97,7 +97,7 @@ class stock_Produit(models.Model):
     quantite = models.DecimalField(max_digits=15, decimal_places=2)
 
 class Vente_Produit(models.Model):
-    date_vente = models.DateField(auto_now_add=True)
+    date_vente = models.DateField()
     code = models.CharField(max_length=10, unique=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE,related_name='vente_produits')
     centre = models.ForeignKey(Centre, on_delete=models.CASCADE)
@@ -113,7 +113,7 @@ class Vente_Produit(models.Model):
     credit = models.DecimalField(
         max_digits=10, decimal_places=2, default=0, blank=True, null=True
     )
-
+ 
 class PaiementCreditCentre(models.Model):
     centre = models.ForeignKey(Centre, on_delete=models.CASCADE)
     vente = models.ForeignKey(Vente_Produit, on_delete=models.CASCADE)

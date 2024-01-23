@@ -5,8 +5,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Centre</title>
-  <!-- Add your stylesheet link here if needed -->
+  <style>
+  button.absent {
+      background-color: red;  /* Change the background color for absent */
+      color: white;           /* Change the text color for absent */
+  }
+
+  button.present {
+      background-color: green;  /* Change the background color for present */
+      color: white;             /* Change the text color for present */
+  }
+</style>
+
 </head>
+
 <body>
 
   <!-- centre.html -->
@@ -25,30 +37,35 @@
         <th>Code Employé</th>
         <th>Nom Employé</th>
         <th>ABSENCE</th>
-        <th>Action</th>
       </tr>
     </thead>
     <tbody>
       {% for employe in employes %}
-      <tr>
-        <td><a href="{% url 'detail_employe' employe.id %}">{{ employe.id }}</a></td>
-        <td>{{ employe.nom }}</td>
-        <td>
-          <form method="post" action="{% url 'modify_absence' employe.id %}">
-            {% csrf_token %}
-            <input type="radio" name="absence" {% if employe.absence %}checked{% endif %}>
-            <button type="submit">ABSENCE</button>
-          </form>
-        </td>
-        <td>
-          {% if not employe.absent %}
-            <button><a href="{% url 'paiement_employe' employe.id %}">Payer</a></button>
+        {% for paiement in today_paiements %}
+          {% if paiement.employe.id == employe.id %}
+            <tr>
+              <td><a href="{% url 'detail_employe' employe.id %}">{{ employe.id }}</a></td>
+              <td>{{ employe.nom }}</td>
+              <td>
+                <form method="post" action="{% url 'modify_absence' employe.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="{% if paiement.absence %}absent{% else %}present{% endif %}">
+                      ABSENCE
+                  </button>
+                </form>
+              </td>
+              <td>
+                {% if not paiement.absence %}
+                  <button><a href="{% url 'paiement_employe' employe.id %}">Payer</a></button>
+                {% endif %}
+              </td>
+            </tr>
           {% endif %}
-        </td>
-      </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>
+  
   <br />
 
   <!-- Sales Table -->
@@ -116,15 +133,8 @@
         <tr>
           <td>{{ vente.date_vente }}</td>
           <td>{{ vente.code }}</td>
-        
-     
-        <!-- {% for paiement in today_paiements %}
-          <td>{{ paiement.employe.nom }}</td>
-        </tr>
-          {% endfor %} -->
-
       {% endfor %}
-      {% if today_ventes|length == 0 and today_paiements|length == 0 %}
+      {% if today_ventes|length == 0 %}
         <tr>
           <td colspan="3">Aucune transaction aujourd'hui.</td>
         </tr>
@@ -133,21 +143,33 @@
 </table>
 <br/><br/>
     <h3>Informations sur les employes aujourd'huit</h3>
-
-<table border="1">
-    <tr>
-        <th>Code Employé</th>
-       
-        <th>Montant Payé</th>
-    </tr>
-    {% for paiement in today_paiements %}
-    <tr>
-      <td>{{ paiement.employe.id }}</td>
-      <td>{{ paiement.montant }}</td>
-    </tr>
-    {% endfor %}
-</table>
+    <table border="1">
+      <tr>
+          <th>Code Employé</th>
+          <th>Montant Payé</th>
+          <th>Absence</th>
+      
+      </tr>
+      {% for paiement in today_paiements %}
+      <tr>
+          <td>{{ paiement.employe.id }}</td>
+          {% if paiement.absence %}
+               <td>/ \ / \ / \ </td>
+              <td>oui</td>
+          {% else %}
+              <td>{{ paiement.montant }}</td>
+              <td>non</td>
+          {% endif %}
+          {% endfor %}
+      </tr>
+	      {% if today_paiements|length == 0 %}
+	      <tr>
+	          <td colspan="3">Aucune transaction aujourd'hui.</td>
+	        </tr>
+	      {% endif %}
+      
   </table>
+
   <br />
 
   <a href="{% url 'calcul_ventes_nettes' centre.id %}">

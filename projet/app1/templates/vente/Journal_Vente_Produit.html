@@ -54,9 +54,8 @@
       
     </table>
     <br /><br />
-    <a href="{% url 'magasin' %}">
-      <button>Retourner vers la page magasin</button>
-    </a>
+    <button><a href="{% url 'centre' centre.id %}">Retour au centre</a></button> 
+
    
     <a href="{% url 'Journal_Vente_Produit' centre.id %}">
       <button>Refresh</button>
