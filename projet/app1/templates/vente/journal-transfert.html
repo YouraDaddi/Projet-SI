@@ -1,0 +1,40 @@
+<!-- journal_transferts.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Journal des Transferts</title>
+</head>
+<body>
+    <h3>Journal des Transferts pour le Centre {{ centre.nom }}</h3>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Date de Transfert</th>
+                <th>Quantité Transférée</th>
+                <th>Coût de Transfert</th>
+                <!-- Add more columns if needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for transfert in transferts %}
+                <tr>
+                    <td>{{ transfert.date_transfert }}</td>
+                    <td>{{ transfert.quantite }}</td>
+                    <td>{{ transfert.cout_transfert }}</td>
+                    <!-- Add more cells if needed -->
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Aucun transfert disponible pour ce centre.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>Total des Coûts de Transferts : {{ total_transferts }}</p>
+
+    <br/><br/>
+    <a href="{% url 'centre' centre.id %}">Retour</a>
+</body>
+</html>

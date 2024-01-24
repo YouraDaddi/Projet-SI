@@ -1,13 +1,14 @@
+<!-- app_name/templates/vente/resultat_benefice.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Résultat du Calcul de Bénéfice</title>
+    <title>Résultat du Bénéfice</title>
 </head>
 <body>
-    <h1>Résultat du Calcul de Bénéfice</h1>
-    <p>Le bénéfice net entre {{ date_debut }} et {{ date_fin }} du centre {{ codecentre }} est de : {{ resultat }}</p>
-    <!-- You can style the page as needed -->
+    <h2>Résultat du Bénéfice</h2>
+    <p>Centre: {{ centre.nom }}</p>
+    <p>Bénéfice entre {{ form.cleaned_data.date_debut|date:"d/m/Y" }} et {{ form.cleaned_data.date_fin|date:"d/m/Y" }} : {{ benefice }}</p>
+    <a href="{% url 'centre' centre.id %}">Retour à l'accueil</a>
+
 </body>
 </html>

@@ -10,6 +10,7 @@
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
+        <h5>{{message}}</h5>
         <input type="submit" value="Transférer">
     </form>
 </body>

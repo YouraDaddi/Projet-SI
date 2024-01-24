@@ -7,41 +7,75 @@
 <body>
     <h3>Stock State</h3>
     
-    <form method="get" action="">
-        {{ form.as_p }}
-        <input type="submit" value="Search">
-    </form>
-    <br/><br/>
-    {% if stock_entries %}
-        <table border="1">
+    
+      <h2>Stock du Centre {{ centre.nom }}</h2>
+    
+      <!-- Tableau des Produits du Centre -->
+      <h3>Produits du Centre</h3>
+      <form method="get" action="">
+        {{ form_produit.as_p }}
+        <button type="submit">Rechercher</button>
+      </form>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <!-- Ajoutez d'autres colonnes si nécessaire -->
+          </tr>
+        </thead>
+        <tbody>
+          {% for produit in produits_du_centre %}
             <tr>
-                <th>Produit</th>
-                <th>Centre</th>
-                <th>Quantité</th>
+              <td>{{ produit.produit.designation }}</td>
+              <td>{{ produit.quantite }}</td>
+              <!-- Ajoutez d'autres cellules si nécessaire -->
             </tr>
-            {% for stock_entry in stock_entries %}
-                <tr>
-                    <td>{{ stock_entry.produit.designation }}</td>
-                    <td>{{ stock_entry.centre.code }}</td>
-                    <td>{{ stock_entry.quantite }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        {% if form.cleaned_data.Recherceh_Nom_Code %}
-        <h3 style="color: red;"><p>Aucun produit trouvé avec le nom / désignation "{{ form.cleaned_data.Recherceh_Nom_Code }}".</p></h3>
-        {% else %}
-            <p>Le stock est vide.</p>
-        {% endif %}
-    {% endif %}
+          {% empty %}
+            <tr>
+              <td colspan="2">Aucun Produit</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h5 style="color: brown;">{{message}}</h5>
+      <!-- Tableau des Matières du Centre -->
+      <h3>Matériaux du Centre</h3>
+      <form method="get" action="">
+        {{ form_matiere.as_p }}
+        <button type="submit">Rechercher</button>
+      </form>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Matière</th>
+            <th>Quantité</th>
+            <!-- Ajoutez d'autres colonnes si nécessaire -->
+          </tr>
+        </thead>
+        <tbody>
+          {% for matiere in matieres_du_centre %}
+            <tr>
+               <td>{{ matiere.Matiere_premiere.designation }}</td>
+              <td>{{ matiere.quantite }}</td>
+              <!-- Ajoutez d'autres cellules si nécessaire -->
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="2">Aucune Matière</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
     <br/><br/>
     <a href="{% url 'stock_state' centre.id %}">
         <button>Refresh</button>
-      </a>
-      <br/><br/>
+    </a>
+    <br/><br/>
     <button><a href="{% url 'Produit' centre.id %}">Ajouter produit</a></button>
     <br/><br/>
-   <button><a href="{% url 'centre' centre.id %}">Retour au centre</a></button> 
+    <button><a href="{% url 'centre' centre.id %}">Retour au centre</a></button> 
 
 </body>
 </html>

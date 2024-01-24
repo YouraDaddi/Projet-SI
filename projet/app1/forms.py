@@ -152,8 +152,11 @@ class RechercheVenteProduitForm(forms.Form):
     date= forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
 
 class RechercheStockProduitForm(forms.Form):
-    Recherceh_Nom_Code = forms.CharField(required=False)
+    Recherche_Nom_Code = forms.CharField(label="Recherche par nom ou code", required=False)
 
+class RechercheStockMatiereForm(forms.Form):
+    Recherche_Nom_Code = forms.CharField(label="Recherche par nom ou code", required=False)
+    
 class CalculVentesNettesForm(forms.Form):
     date_debut = forms.DateField(label='Date de début')
     date_fin = forms.DateField(label='Date de fin')
@@ -197,10 +200,7 @@ class Add_Produit_StockForm(forms.Form):
     quantite = forms.DecimalField(label='Quantité')
 
 
+
 class CalculBeneficeForm(forms.Form):
     date_debut = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     date_fin = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    codecentre = forms.CharField()
-    pourcentage_absence = forms.DecimalField(
-        label="Pourcentage d'absence", min_value=0, max_value=100
-    )

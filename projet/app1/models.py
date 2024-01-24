@@ -1,4 +1,9 @@
+from ctypes.wintypes import HINSTANCE
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 class Centre(models.Model):
     code=models.CharField(max_length=100)
@@ -17,7 +22,7 @@ class Fournisseur(models.Model):
     prenom = models.CharField(max_length=100)
     adresse = models.TextField()
     telephone = models.CharField(max_length=15)
-    solde = models.DecimalField(max_digits=10, decimal_places=2)
+    solde = models.DecimalField(max_digits=10, decimal_places=2 ,default=0)
 
 class Employe(models.Model):
     nom = models.CharField(max_length=100)
@@ -33,8 +38,8 @@ class Matiere_premiere(models.Model):
 class Produit(models.Model):
     designation = models.CharField(max_length=100)
     matiere_quantite = models.JSONField(null=True, blank=True)
-    
-     
+ 
+
 class Achat(models.Model):
     fournisseur = models.ForeignKey(Fournisseur, on_delete=models.CASCADE)
     matiere = models.ForeignKey(Matiere_premiere, on_delete=models.CASCADE, null=True)
@@ -44,8 +49,6 @@ class Achat(models.Model):
     @property
     def montant_achat(self):
         return self.quantite * self.prix_unitaire_HT
-
-
 
 class Reglement(models.Model):
     achat = models.ForeignKey(Achat, on_delete=models.CASCADE,null=True)
@@ -69,7 +72,6 @@ class paiementcredit(models.Model):
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     date_paiement_credit = models.DateField()
 
-
 class Transfert(models.Model):
     date_transfert = models.DateField()
     centre_dest = models.ForeignKey(Centre, on_delete=models.CASCADE)
@@ -84,12 +86,17 @@ class Stock(models.Model):
     fournisseur  = models.ForeignKey(Fournisseur, on_delete=models.CASCADE)
     date_achat = models.DateField(null=True)
     prix = models.DecimalField(max_digits=10, decimal_places=2)
-
-
+ 
 class stock_Produit(models.Model):
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     centre = models.ForeignKey(Centre, on_delete=models.CASCADE)
     quantite = models.DecimalField(max_digits=15, decimal_places=2)
+  
+class stock_Matiere(models.Model):
+    Matiere_premiere = models.ForeignKey(Matiere_premiere, on_delete=models.CASCADE)
+    centre = models.ForeignKey(Centre, on_delete=models.CASCADE)
+    quantite = models.DecimalField(max_digits=15, decimal_places=2)
+ 
 
 class Vente_Produit(models.Model):
     date_vente = models.DateField()

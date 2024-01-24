@@ -180,16 +180,14 @@
  <a href="{% url 'magasin' %}">
   <button>Retourner vers la page magasin</button>
 </a>
-<br /><br /><br /><br />
+<br /><br />
+<a href="{% url 'journal_transferts' centre.id %}">
+  <button>Journal transfert</button>
+</a><br /><br />
 <!-- template.html -->
-<form method="post" action="{% url 'calcul_benefice' centre_id=centre.id  %}">
-  {% csrf_token %}
-  {{ form.date_debut }}
-  {{ form.date_fin }}
-  {{ form.pourcentage_absence }}
-  <button type="submit">Calculate Benefit</button>
-  <input type="hidden" name="{{ form.calculate_button.name }}" value="{{ form.calculate_button.value }}">
-</form>
+<a href="{% url 'calculer_benefice' centre.id %}">
+  <button>CALCULE BENEFICEt</button>
+</a>
 
 
 </body>

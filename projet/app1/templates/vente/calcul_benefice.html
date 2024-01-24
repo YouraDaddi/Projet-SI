@@ -1,0 +1,15 @@
+<!-- app_name/templates/vente/calcul_ventes_nettes.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calcul Ventes Nettes</title>
+</head>
+<body>
+    <h2>Calculer le Bénéfice</h2>
+    <form method="post" action="">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Calculer</button>
+    </form>
+</body>
+</html>

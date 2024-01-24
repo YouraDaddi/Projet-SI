@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+
 from .models import (
     Centre,
     Produit,
@@ -12,6 +13,9 @@ from .models import (
     paiementcredit,
     Stock,
     Matiere_premiere,
+    stock_Produit,
+    stock_Matiere,
+    
 )
 from .forms import (
     FournisseurForm,
@@ -785,47 +789,70 @@ def complete_paiement(request):
 
 
 # ---------------TRANSFERT
+# from django.db.models import F
+# from django.db.models import Sum, F
+
+# from django.db.models import Sum
 
 def transferer_matiere(request):
     message = ''
+    
     if request.method == 'POST':
         form = TransfertForm(request.POST)
         if form.is_valid():
             transfert = form.save(commit=False)
 
-            # Calculate the total quantity of the specified material in stock
-            matiere_en_stock = Stock.objects.filter(matiere=transfert.matiere).aggregate(total_quantite=Sum('quantite'))['total_quantite']
+            # Check if the material is in stock
+            matiere_stock_exists = Stock.objects.filter(matiere=transfert.matiere).exists()
 
-            # Check if the total quantity is sufficient for the transfer
-            if matiere_en_stock is not None and matiere_en_stock >= transfert.quantite:
-                # Calculate the cost of transfer based on the price of the material in stock
-                prix_matiere_stock = Stock.objects.filter(matiere=transfert.matiere).first().prix
-                transfert.cout_transfert = transfert.quantite * prix_matiere_stock
+            if matiere_stock_exists:
+                # Calculate the total quantity of the specified material in stock
+                matiere_en_stock = Stock.objects.filter(matiere=transfert.matiere).aggregate(total_quantite=Sum('quantite'))['total_quantite']
 
-                # Distribute the transfer quantity among the stock rows
-                stocks = Stock.objects.filter(matiere=transfert.matiere).order_by('date_achat')
+                # Check if the total quantity is sufficient for the transfer
+                if matiere_en_stock is not None and matiere_en_stock >= transfert.quantite:
+                    # Calculate the cost of transfer based on the price of the material in stock
+                    prix_matiere_stock = Stock.objects.filter(matiere=transfert.matiere).first().prix
+                    transfert.cout_transfert = transfert.quantite * prix_matiere_stock
 
-                remaining_quantity = transfert.quantite
-                for stock in stocks:
-                    if stock.quantite >= remaining_quantity:
-                        # If the stock has enough quantity, update it and break
-                        stock.quantite = F('quantite') - transfert.quantite
-                        stock.save()
-                        break
-                    else:
-                        # Update the stock with remaining quantity and continue to the next one
-                        remaining_quantity -= stock.quantite
-                        stock.quantite = 0
-                        stock.save()
+                    # Distribute the transfer quantity among the stock rows
+                    stocks = Stock.objects.filter(matiere=transfert.matiere).order_by('date_achat')
 
-                transfert.save()
-                return redirect('journal_transferts')
+                    remaining_quantity = transfert.quantite
+                    for stock in stocks:
+                        if stock.quantite >= remaining_quantity:
+                            # If the stock has enough quantity, update it and break
+                            stock.quantite = F('quantite') - transfert.quantite
+                            stock.save()
+
+                            # Update the stock quantity in stock_Matiere
+                            stock_matiere_entry, created = stock_Matiere.objects.get_or_create(
+                                Matiere_premiere=transfert.matiere,
+                                centre=transfert.centre_dest,
+                                defaults={'quantite': transfert.quantite}
+                            )
+                            if not created:
+                                stock_matiere_entry.quantite = F('quantite') + transfert.quantite
+                                stock_matiere_entry.save()
+
+                            break
+                        else:
+                            # Update the stock with remaining quantity and continue to the next one
+                            remaining_quantity -= stock.quantite
+                            stock.quantite = 0
+                            stock.save()
+
+                    transfert.save()
+                    return redirect('journal_transferts')
+                else:
+                    message = 'Matière insuffisante en stock pour le transfert.'
             else:
-                message = 'MatiÃ¨re insuffisante en stock pour le transfert.'
+                message = 'Matière non disponible en stock.'
     else:
         form = TransfertForm()
 
     return render(request, 'transferer_matiere.html', {'form': form, 'message': message})
+
 
 def journal_transferts(request):
     transferts = Transfert.objects.all()
@@ -1008,6 +1035,8 @@ from .models import (
     Paiement_E,
     Vente_Produit,
     stock_Produit,
+    stock_Matiere,
+   
 )
 from .forms import (
     CalculSalaireForm,
@@ -1024,6 +1053,7 @@ from .forms import (
     RechercheVenteProduitForm,
     Add_Produit_StockForm,
     RechercheStockProduitForm,
+    RechercheStockMatiereForm,
 )
 from django.db import models
 
@@ -1570,59 +1600,119 @@ def supprimer_vente(request, vente_id):
 
     return render(request, "vente/supprimer_vente.html", context)
 
+from django.db.models import Q
 
 def stock_state(request, centre_id):
     centre = get_object_or_404(Centre, pk=centre_id)
-    stock_entries = stock_Produit.objects.filter(centre=centre)
+    stock_entries_produit = stock_Produit.objects.filter(centre=centre)
+    stock_entries_matiere = stock_Matiere.objects.filter(centre=centre)
 
-    # Handling the search form
-    form = RechercheStockProduitForm(request.GET)
+    produits_du_centre = stock_Produit.objects.filter(centre=centre)
+    matieres_du_centre = stock_Matiere.objects.filter(centre=centre)
 
-    if form.is_valid():
-        # Retrieve the values entered in the search form
-        search_term = form.cleaned_data.get("Recherceh_Nom_Code")
+    form_produit = RechercheStockProduitForm(request.GET, prefix='produit')
+    form_matiere = RechercheStockMatiereForm(request.GET, prefix='matiere')
 
-        # If a search term is provided, filter stock_entries based on the product code or designation
-        if search_term:
-            stock_entries = stock_entries.filter(
-                Q(produit__designation__icontains=search_term)
+    if request.method == "GET" and form_produit.is_valid():
+        # Retrieve the values entered in the product search form
+        search_term_produit = form_produit.cleaned_data.get("Recherche_Nom_Code")
+        if search_term_produit:
+            stock_entries_produit = stock_entries_produit.filter(
+                Q(produit__designation__icontains=search_term_produit)
+            )
+
+    if request.method == "GET" and form_matiere.is_valid():
+        # Retrieve the values entered in the matiere search form
+        search_term_matiere = form_matiere.cleaned_data.get("Recherche_Nom_Code")
+        if search_term_matiere:
+            stock_entries_matiere = stock_entries_matiere.filter(
+                Q(Matiere_premiere__designation__icontains=search_term_matiere)
             )
 
     return render(
         request,
         "vente/stock_state.html",
-        {"stock_entries": stock_entries, "centre": centre, "form": form},
+        {
+            "produits_du_centre": stock_entries_produit,  # Utilisez le résultat filtré ici
+            "matieres_du_centre": stock_entries_matiere,  # Utilisez le résultat filtré ici
+            "centre": centre,
+            "form_matiere": form_matiere,
+            "form_produit": form_produit,
+        },
     )
 
+def journal_transfert_c(request, centre_id):
+    centre = get_object_or_404(Centre, pk=centre_id)
+    transferts = Transfert.objects.filter(centre_dest=centre)
+    total_transferts = sum(transfert.cout_transfert for transfert in transferts)
+    
+    return render(
+        request,
+        "vente/journal-transfert.html",
+        {"transferts": transferts, "total_transferts": total_transferts, "centre": centre},
+    )
 
-# def add_produit_to_stock(request, centre_id):
-#     centre = Centre.objects.get(id=centre_id)
+    
+ 
+from django.db import transaction
 
-#     if request.method == "POST":
-#         form = Add_Produit_StockForm(request.POST)
-#         if form.is_valid():
-#             produit = form.cleaned_data["produit"]
-#             quantite = form.cleaned_data["quantite"]
+def add_produit_to_stock(request, centre_id):
+    centre = get_object_or_404(Centre, id=centre_id)
+    message = ''
+    if request.method == "POST":
+        form = Add_Produit_StockForm(request.POST, initial={"centre": centre_id})
+        if form.is_valid():
+            produit = form.cleaned_data["produit"]
+            quantite = form.cleaned_data["quantite"]
 
-#             # Try to get the existing stock entry, or create a new one if it doesn't exist
-#             stock_entry, created = stock_Produit.objects.get_or_create(
+            # Vérifier si la quantité de matière première est suffisante pour tous les produits
+            with transaction.atomic():
+                for matiere_id, qte_matiere in produit.matiere_quantite.items():
+                    matiere_en_stock = stock_Matiere.objects.filter(
+                        Matiere_premiere_id=matiere_id, centre=centre
+                    ).aggregate(total_quantite=Sum("quantite"))["total_quantite"]
 
-#                 produit=produit,
-#                 centre=centre,
-#                 defaults={"quantite": quantite},  # Set the default value for quantite
-#             )
+                    if matiere_en_stock is None or matiere_en_stock < qte_matiere * quantite:
+                        # Si une matière première est insuffisante, afficher un message d'erreur
+                        matiere = Matiere_premiere.objects.get(id=matiere_id)
+                        message = 'Matiere insuffisante en stock pour la creation.'
+                        return redirect("stock_state", centre_id=centre.id)
 
-#             # If the stock entry already exists, update the quantite field
-#             if not created:
-#                 stock_entry.quantite += quantite
-#                 stock_entry.save()
+                # Toutes les matières premières sont suffisantes, procéder à l'ajout au stock
+                for matiere_id, qte_matiere in produit.matiere_quantite.items():
+                    # Mettre à jour la quantité de matières premières dans le stock
+                    stock_matiere = stock_Matiere.objects.filter(
+                        Matiere_premiere_id=matiere_id, centre=centre
+                    ).order_by("id").first()
 
-#             return redirect("stock_state", centre_id=centre.id)
-#     else:
-#         form = Add_Produit_StockForm()
+                    stock_matiere.quantite = F("quantite") - qte_matiere * quantite
+                    stock_matiere.save()
 
-#     return render(request, "vente/Produit.html", {"centre": centre, "form": form})
-  
+                # Vérifier si le produit existe déjà dans le stock du centre
+                existing_stock_produit = stock_Produit.objects.filter(
+                    produit=produit,
+                    centre=centre,
+                ).first()
+
+                if existing_stock_produit:
+                    # Si le produit existe, ajouter simplement la quantité
+                    existing_stock_produit.quantite += quantite
+                    existing_stock_produit.save()
+                else:
+                    # Créer un nouvel enregistrement dans stock_Produit
+                    stock_produit = stock_Produit.objects.create(
+                        produit=produit,
+                        centre=centre,
+                        quantite=quantite,
+                    )
+
+            return redirect("stock_state", centre_id=centre.id)
+    else:
+        form = Add_Produit_StockForm(initial={"centre": centre_id})
+
+    return render(request, "vente/Produit.html", {"centre": centre, "form": form ,'message': message})
+
+
 
 def calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin):
     # Obtenir toutes les ventes entre les deux dates
@@ -1639,6 +1729,7 @@ def calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin):
         montant_ventes_nettes += vente.montant_total - vente.credit
 
     return montant_ventes_nettes
+
 
 
 def calcul_ventes_nettes(request, centre_id):
@@ -1669,56 +1760,65 @@ def calcul_ventes_nettes(request, centre_id):
     )
 
 # ---------------------Benefice update --------------------def 
-def calculer_benefice_entre_dates(centre, employe, date_debut, date_fin, salaire_absence):
-    # Calculate net sales
-    ventes_nettes = calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin)
 
-    # Calculate total salary
-    salaire_total = calculer_salaire_entre_dates(employe, date_debut, date_fin, salaire_absence)
+def calculer_transfert_entre_dates(centre, date_debut, date_fin):
+    # Get all transfers between the two dates for the given center
+    transferts = Transfert.objects.filter(
+        centre_dest=centre, date_transfert__range=(date_debut, date_fin)
+    )
 
-    # Calculate profit
-    benefice = ventes_nettes - salaire_total
+    # Initialize the total amount of transfers
+    montant_transferts = 0
+
+    # Iterate over each transfer between date_debut and date_fin
+    for transfert in transferts:
+        # Add the total amount adjusted based on the credit
+        montant_transferts += transfert.cout_transfert
+
+    return montant_transferts
+
+def calculer_benefice_entre_dates(centre, date_debut, date_fin):
+    # Calculate total sales between the two dates for the given center
+    montant_ventes_nettes = calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin)
+
+    # Calculate total transfers between the two dates for the given center
+    montant_transferts = calculer_transfert_entre_dates(centre, date_debut, date_fin)
+
+    # Calculate the benefit as the difference between total sales and total transfers
+    benefice = montant_ventes_nettes - montant_transferts
 
     return benefice
 
 
-def calcul_benefice(request, centre_id):
-    centre = Centre.objects.get(pk=centre_id)
-    employes = Employe.objects.filter(centre=centre)
+def calculer_benefice(request, centre_id):
+    centre = get_object_or_404(Centre, pk=centre_id)
 
     if request.method == "POST":
-        form = CalculBeneficeForm(request.POST, initial={"centre": centre_id})
+        form = CalculBeneficeForm(request.POST)
 
-        if form.is_valid() and form.cleaned_data.get("calculate_button") == "calculate":
+        if form.is_valid():
             date_debut = form.cleaned_data["date_debut"]
             date_fin = form.cleaned_data["date_fin"]
-            pourcentage_absence = form.cleaned_data["pourcentage_absence"]
 
-            # Calculate benefit for each employee
-            results = []
-            for employe in employes:
-                benefice = calculer_benefice_entre_dates(
-                    employe, date_debut, date_fin, pourcentage_absence
-                )
-                results.append({"employe": employe, "benefice": benefice})
+            ventes_nettes = calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin)
+            transferts = calculer_transfert_entre_dates(centre, date_debut, date_fin)
+
+            benefice = ventes_nettes - transferts
 
             return render(
                 request,
-                "vente/resultat_Benefice.html",
-                {"results": results, "centre": centre, "form": form},
+                "vente/resultat_benefice.html",
+                {"benefice": benefice, "centre": centre, "form": form},
             )
+
     else:
-        form = CalculBeneficeForm( initial={"centre": centre_id})
+        form = CalculBeneficeForm()
 
     return render(
-        request,
-        "vente/calculeBenefForm.html",
-        {"form": form, "centre": centre},
+        request, "vente/calcul_benefice.html", {"form": form, "centre": centre}
     )
 
-
 # ---------------------------SECTION 5 CENTRE --------------------------
-
 
 def analyze_ventes(request):
     # Récupérer toutes les ventes pour les 12 derniers mois
