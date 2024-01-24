@@ -1,14 +1,17 @@
-<!-- app_name/templates/vente/resultat_benefice.html -->
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Résultat du Bénéfice</title>
+    <link rel="stylesheet" href="{% static 'css/css.css' %}">
+
 </head>
 <body>
     <h2>Résultat du Bénéfice</h2>
     <p>Centre: {{ centre.nom }}</p>
     <p>Bénéfice entre {{ form.cleaned_data.date_debut|date:"d/m/Y" }} et {{ form.cleaned_data.date_fin|date:"d/m/Y" }} : {{ benefice }}</p>
-    <a href="{% url 'centre' centre.id %}">Retour à l'accueil</a>
+    <a href="{% url 'detail_employe' employe.id %}">Retour à l'accueil</a>
+
 
 </body>
 </html>

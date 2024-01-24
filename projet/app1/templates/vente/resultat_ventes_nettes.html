@@ -1,9 +1,14 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Résultat des ventes nettes</title>
+    <title>Résultat des ventes nettes</title>    
+    <link rel="stylesheet" href="{% static 'css/css.css' %}">
+
+
   </head>
   <body>
     <h3>Résultat des ventes nettes</h3>
@@ -12,6 +17,6 @@
     </p>
     <h3><p>{{ ventes_nettes }}</p></h3>
 
-    <a href="{% url 'magasin' %}">Retour à la page du magasin</a>
+    <a href="{% url 'detail_employe' employe.id %}">Retour à l'accueil</a>
   </body>
 </html>

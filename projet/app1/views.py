@@ -852,7 +852,7 @@ def transferer_matiere(request):
         form = TransfertForm()
 
     return render(request, 'transferer_matiere.html', {'form': form, 'message': message})
-
+ 
 
 def journal_transferts(request):
     transferts = Transfert.objects.all()
@@ -894,7 +894,7 @@ def etat_stock(request):
     return render(request, "etat_stock.html", {"stocks": stocks, "total": total})
 
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa  # pip install xhtml2pdf
 
@@ -1652,8 +1652,6 @@ def journal_transfert_c(request, centre_id):
         {"transferts": transferts, "total_transferts": total_transferts, "centre": centre},
     )
 
-    
- 
 from django.db import transaction
 
 def add_produit_to_stock(request, centre_id):
@@ -1712,8 +1710,6 @@ def add_produit_to_stock(request, centre_id):
 
     return render(request, "vente/Produit.html", {"centre": centre, "form": form ,'message': message})
 
-
-
 def calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin):
     # Obtenir toutes les ventes entre les deux dates
     ventes = Vente_Produit.objects.filter(
@@ -1729,8 +1725,6 @@ def calculer_ventes_nettes_entre_dates(centre, date_debut, date_fin):
         montant_ventes_nettes += vente.montant_total - vente.credit
 
     return montant_ventes_nettes
-
-
 
 def calcul_ventes_nettes(request, centre_id):
     centre = Centre.objects.get(pk=centre_id)
@@ -1819,67 +1813,45 @@ def calculer_benefice(request, centre_id):
     )
 
 # ---------------------------SECTION 5 CENTRE --------------------------
+# views.py
 
-def analyze_ventes(request):
-    # Récupérer toutes les ventes pour les 12 derniers mois
-    ventes_data = Vente_Produit.objects.filter(
-        date_vente__gte=(timezone.now() - relativedelta(months=12))
-    )
+from django.http import JsonResponse
+from django.db.models import Sum
 
-    # Calculer le total des ventes pour chaque mois
-    monthly_total_ventes = (
-        ventes_data.annotate(month=TruncMonth("date_vente"))
-        .values("month")
-        .annotate(total_ventes=Sum(F("quantite") * F("prix_unitaire")))
-    )
+def dashboard_ventes(request):
+    return render(request, 'dashboard_ventes.html')
 
-    # Calculer le taux d'évolution de la valeur des ventes
-    total_ventes_values = [entry["total_ventes"] for entry in monthly_total_ventes]
-    monthly_percentage_change = [0] + [
-        (current - previous) / previous * 100
-        for previous, current in zip(total_ventes_values[:-1], total_ventes_values[1:])
-    ]
+def vente_data(request):
+    vente_par_mois = Vente.objects.values('date_vente__month').annotate(total_vente=Sum('montant_vente'))
+    mois = [str(i) for i in range(1, 13)]
+    vente_data = [0] * 12
 
-    # Calculer le taux d'évolution du bénéfice (montant total versé)
-    total_montant_verse = ventes_data.aggregate(
-        total_montant_verse=Sum("montant_verse")
-    )["total_montant_verse"]
+    for item in vente_par_mois:
+        vente_data[item['date_vente__month'] - 1] = item['total_vente']
 
-    # Top clients - Best customers
-    top_clients = Client.objects.annotate(
-        total_achats=Sum(F("vente_produits__montant_total"))
-    ).order_by("-total_achats")[:5]
+    return JsonResponse({'months': mois, 'salesData': vente_data})
 
-    # Les produits Best-seller (par quantité)
-    best_sellers = (
-        ventes_data.values("produit__designation")
-        .annotate(total_quantite=Sum("quantite"))
-        .order_by("-total_quantite")[:5]
-    )
+def taux_evolution_benefice(request):
+    benefice_par_mois = Vente.objects.values('date_vente__month').annotate(total_benefice=Sum('montant_vente') - Sum('montant_achat'))
+    mois = [str(i) for i in range(1, 13)]
+    benefice_data = [0] * 12
 
-    # Créer un graphique à barres pour les ventes mensuelles
-    df = pd.DataFrame(list(monthly_total_ventes))
-    plt.bar(df["month"], df["total_ventes"])
-    plt.title("Ventes mensuelles au cours des 12 derniers mois")
-    plt.xlabel("Mois")
-    plt.ylabel("Total des ventes")
+    for item in benefice_par_mois:
+        benefice_data[item['date_vente__month'] - 1] = item['total_benefice']
 
-    # Enregistrer le graphique dans un objet BytesIO
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format="png")
-    img_buffer.seek(0)
+    return JsonResponse({'months': mois, 'profitData': benefice_data})
 
-    # Convertir l'objet BytesIO en base64 pour l'intégrer dans HTML
-    img_data = base64.b64encode(img_buffer.getvalue()).decode("utf-8")
+def top_clients(request):
+    top_clients_data = Vente.objects.values('client__nom', 'client__prenom').annotate(total_vente=Sum('montant_vente')).order_by('-total_vente')[:5]
+    top_clients_names = [f"{item['client__nom']} {item['client__prenom']}" for item in top_clients_data]
+    top_clients_sales = [item['total_vente'] for item in top_clients_data]
 
-    # Rendre les données dans le modèle
-    context = {
-        "monthly_total_ventes": monthly_total_ventes,
-        "monthly_percentage_change": monthly_percentage_change,
-        "total_montant_verse": total_montant_verse,
-        "top_clients": top_clients,
-        "best_sellers": best_sellers,
-        "chart_image": img_data,
-    }
+    return JsonResponse({'topClientsNames': top_clients_names, 'topClientsSales': top_clients_sales})
 
-    return render(request, "dashboard_ventes.html", context)
+def best_selling_products(request):
+    best_selling_products_data = Vente.objects.values('produit__designation').annotate(total_quantite=Sum('quantite')).order_by('-total_quantite')[:5]
+    best_selling_products_names = [item['produit__designation'] for item in best_selling_products_data]
+    best_selling_products_quantities = [item['total_quantite'] for item in best_selling_products_data]
+
+    return JsonResponse({'bestSellingProductsNames': best_selling_products_names, 'bestSellingProductsQuantities': best_selling_products_quantities})
+

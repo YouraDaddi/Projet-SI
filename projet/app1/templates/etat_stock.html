@@ -44,7 +44,7 @@
             {% if stocks %}
             {% for stock in stocks %}
             {% if stock.quantite >= 0 %}
-            <tr style="{% if stock.quantite < 10 %} background-color: orange; {% endif %}">
+            <tr >
                 <td>{{ stock.matiere.designation }}</td>
                 <td>{{ stock.quantite }}</td>
                 <td>{{ stock.fournisseur.nom }}</td>

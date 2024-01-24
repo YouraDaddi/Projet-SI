@@ -1,13 +1,19 @@
-<!-- templates/resultat_salaire.html -->
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Résultat du Salaire</title>
+    
+    <link rel="stylesheet" href="{% static 'css/css.css' %}">
+
 </head>
 <body>
 
   <h2>Résultat du Salaire pour {{ employe.nom }} {{ employe.prenom }}</h2>
   <p>Le salaire est de : {{ salaire }}</p>
+  <a href="{% url 'detail_employe' employe.id %}">Retour à l'accueil</a>
+
 
 </body>
 </html>

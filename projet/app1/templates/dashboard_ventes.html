@@ -1,46 +1,226 @@
-<!-- templates/dashboard_ventes.html -->
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard des Ventes</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analyse des Ventes</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <!-- Vos graphiques seront affichés ici -->
+    <div id="charts-container">
+      <canvas id="salesChart" width="400" height="300"></canvas>
+      <canvas id="profitChart" width="400" height="300"></canvas>
+      <canvas id="topCustomersChart" width="400" height="300"></canvas>
+      <canvas id="bestSellingProductsChart" width="400" height="300"></canvas>
+    </div>
 
-    <h1>Dashboard des Ventes</h1>
+    <!-- Utilisez un lien direct pour rediriger vers dashboard.html -->
+    <a href=" {% url 'magasin' %}">
+      <button>Aller vers la page magasin</button>
+    </a>
+    <script>
+      // Exemple de données fictives
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const salesData = [
+        100, 120, 150, 80, 200, 180, 160, 210, 190, 220, 250, 230,
+      ];
+      const profitData = [50, 60, 75, 40, 100, 90, 80, 105, 95, 110, 125, 115];
+      const topCustomersData = [30, 25, 20, 18, 15];
+      const bestSellingProductsData = [50, 45, 40, 35, 30];
 
-    <!-- Affichage du graphique -->
-    <img src="data:image/png;base64,{{ chart_image }}" alt="Graphique des ventes mensuelles">
+      // Créer un graphique pour le taux d'évolution des ventes
+      const salesChart = new Chart(
+        document.getElementById("salesChart").getContext("2d"),
+        {
+          type: "line",
+          data: {
+            labels: months,
+            datasets: [
+              {
+                label: "Taux d'évolution des ventes",
+                data: salesData,
+                borderColor: "blue",
+                borderWidth: 2,
+                fill: false,
+              },
+            ],
+          },
+        }
+      );
 
-    <!-- Affichage des autres données -->
-    <h2>Total des ventes : {{ total_montant_verse }}</h2>
+      // Créer un graphique pour le taux d'évolution du bénéfice
+      const profitChart = new Chart(
+        document.getElementById("profitChart").getContext("2d"),
+        {
+          type: "line",
+          data: {
+            labels: months,
+            datasets: [
+              {
+                label: "Taux d'évolution du bénéfice",
+                data: profitData,
+                borderColor: "green",
+                borderWidth: 2,
+                fill: false,
+              },
+            ],
+          },
+        }
+      );
 
-    <h2>Top Clients :</h2>
-    <ul>
-        {% for client in top_clients %}
-            <li>{{ client.nom }} {{ client.prenom }} - Total des achats : {{ client.total_achats }}</li>
-        {% endfor %}
-    </ul>
+      // Créer un graphique pour les top clients
+      const topCustomersChart = new Chart(
+        document.getElementById("topCustomersChart").getContext("2d"),
+        {
+          type: "bar",
+          data: {
+            labels: [
+              "Customer 1",
+              "Customer 2",
+              "Customer 3",
+              "Customer 4",
+              "Customer 5",
+            ],
+            datasets: [
+              {
+                label: "Top Clients",
+                data: topCustomersData,
+                backgroundColor: "orange",
+                borderWidth: 1,
+              },
+            ],
+          },
+        }
+      );
 
-    <h2>Best Sellers :</h2>
-    <ul>
-        {% for seller in best_sellers %}
-            <li>{{ seller.produit__designation }} - Total des ventes : {{ seller.total_quantite }}</li>
-        {% endfor %}
-    </ul>
-
-    <!-- Affichage du pourcentage de changement mensuel -->
-    <h2>Pourcentage de changement mensuel :</h2>
-    <ul>
-        {% for percentage in monthly_percentage_change %}
-            <li>{{ percentage }}%</li>
-        {% endfor %}
-    </ul>
-
-    <!-- Retour à la page précédente -->
-    <a href="{% url 'magasin' %}">Retour à la page précédente</a>
-
-</body>
+      // Créer un graphique pour les produits best-seller par quantité
+      const bestSellingProductsChart = new Chart(
+        document.getElementById("bestSellingProductsChart").getContext("2d"),
+        {
+          type: "bar",
+          data: {
+            labels: [
+              "Product A",
+              "Product B",
+              "Product C",
+              "Product D",
+              "Product E",
+            ],
+            datasets: [
+              {
+                label: "Best-Selling Products",
+                data: bestSellingProductsData,
+                backgroundColor: "purple",
+                borderWidth: 1,
+              },
+            ],
+          },
+        }
+      );
+    </script>
+  </body>
 </html>
+
+<!-- Vos graphiques seront affichés ici -->
+<!-- <div id="charts-container">
+        <canvas id="salesChart" width="400" height="300"></canvas>
+        <canvas id="profitChart" width="400" height="300"></canvas>
+        <canvas id="topCustomersChart" width="400" height="300"></canvas>
+        <canvas id="bestSellingProductsChart" width="400" height="300"></canvas>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Fetch vente data using AJAX
+                fetch('/vente_data/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const salesChart = new Chart(document.getElementById('salesChart').getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: data.months,
+                                datasets: [{
+                                    label: 'Taux d\'évolution des ventes',
+                                    data: data.salesData,
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    fill: false
+                                }]
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Erreur lors de la récupération des données de vente:', error));
+
+                // Fetch taux_evolution_benefice data using AJAX
+                fetch('/taux_evolution_benefice/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const profitChart = new Chart(document.getElementById('profitChart').getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: data.months,
+                                datasets: [{
+                                    label: 'Taux d\'évolution du bénéfice',
+                                    data: data.profitData,
+                                    borderColor: 'green',
+                                    borderWidth: 2,
+                                    fill: false
+                                }]
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Erreur lors de la récupération des données de bénéfice:', error));
+
+                // Fetch top_clients data using AJAX
+                fetch('/top_clients/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const topCustomersChart = new Chart(document.getElementById('topCustomersChart').getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: data.topClientsNames,
+                                datasets: [{
+                                    label: 'Top Clients',
+                                    data: data.topClientsSales,
+                                    backgroundColor: 'orange',
+                                    borderWidth: 1
+                                }]
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Erreur lors de la récupération des données des top clients:', error));
+
+                // Fetch best_selling_products data using AJAX
+                fetch('/best_selling_products/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const bestSellingProductsChart = new Chart(document.getElementById('bestSellingProductsChart').getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: data.bestSellingProductsNames,
+                                datasets: [{
+                                    label: 'Best-Selling Products',
+                                    data: data.bestSellingProductsQuantities,
+                                    backgroundColor: 'purple',
+                                    borderWidth: 1
+                                }]
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Erreur lors de la récupération des données des best-selling products:', error));
+            });
+        </script>
+    </div> -->

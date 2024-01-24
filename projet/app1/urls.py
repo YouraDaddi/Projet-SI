@@ -102,7 +102,12 @@ path('paiement/delete/<int:pk>/', views.paiement_delete, name='paiement_delete')
 
 
 #-------------SECTION  5----
-path('analyze-achats/', views.analyze_achats, name='analyze_achats'),
-path('dashboard_ventes/', views.analyze_ventes, name='dashboard_ventes'),
+   path('dashboard_ventes/', views.dashboard_ventes, name='dashboard_ventes'),
+    path('vente_data/', views.vente_data, name='vente_data'),
+    path('taux_evolution_benefice/', views.taux_evolution_benefice, name='taux_evolution_benefice'),
+    path('top_clients/', views.top_clients, name='top_clients'),
+    path('best_selling_products/', views.best_selling_products, name='best_selling_products'),
+
 ]
+
 

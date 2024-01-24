@@ -1,7 +1,11 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>{{ client.nom }} - Détails du client</title>
+    <link rel="stylesheet" href="{% static 'css/css.css' %}">
+
 </head>
 <body>
     <h1>{{ client.nom }} {{ client.prenom }}</h1>

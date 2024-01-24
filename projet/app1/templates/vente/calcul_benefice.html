@@ -1,8 +1,11 @@
-<!-- app_name/templates/vente/calcul_ventes_nettes.html -->
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Calcul Ventes Nettes</title>
+    <link rel="stylesheet" href="{% static 'css/css.css' %}">
+
 </head>
 <body>
     <h2>Calculer le Bénéfice</h2>
@@ -11,5 +14,8 @@
       {{ form.as_p }}
       <button type="submit">Calculer</button>
     </form>
+
+    <a href="{% url 'centre' centre.id %}"> <button>Retourner </a></button>
+
 </body>
 </html>
