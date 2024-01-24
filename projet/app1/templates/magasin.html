@@ -87,13 +87,13 @@
           <th>Liste des produits disponibles</th>
           <td><a href="{% url 'create_produit' %}"><button class="button-add"> ADD </button></a></td>
         </tr>
-          {% for Produit in produits %}
+        {% for produit in produits %}
         <tr>
-          <td><a  href="{% url 'create_produit' Produit.id %}">{{ Produit.designation }}</a></td>
-          <td><a  href="{% url 'supprimer_produit' Produit.id %}"><button>Delete</button></a></td>
-         </tr>
-        
-       {% endfor %}
+            <td><a href="{% url 'detail_produit' pk=produit.id %}">{{ produit.designation }}</a></td>
+            <td><a href="#" onclick="confirmDelete('{{ produit.id }}')">Supprimer</a></td>
+        </tr>
+    {% endfor %}
+    
          
       {% else %}
         <tr>
@@ -105,7 +105,16 @@
       </tbody>
     </table>
 
-    <!-- link to compiled js file -->
-    <!-- <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script> -->
+
+    <script>
+      function confirmDelete(produitID) {
+          console.log("produit ID:", produitID);
+          var result = confirm("Voulez-vous vraiment supprimer cet vente?");
+          if (result && produitID) {
+              var deleteUrl = "/supprimer_produit/" + produitID + "/";
+              window.location.href = deleteUrl;
+          }
+      }
+  </script>
   </body>
 </html>

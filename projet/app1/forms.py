@@ -1,6 +1,7 @@
 from django.db.models import fields
 from django import forms
 from .models import Centre, Client, Fournisseur, Employe, Produit , Achat, Reglement,Vente,  paiementcredit , Transfert ,Stock ,Matiere_premiere
+from django.db import transaction
 
 class CentreForm(forms.ModelForm):
     class Meta:
@@ -22,16 +23,67 @@ class EmployeForm(forms.ModelForm):
         model = Employe
         fields = "__all__"
 
-class ProduitForm(forms.ModelForm):
-    class Meta:
-        model = Produit
-        fields = "__all__"
+# class ProduitForm(forms.ModelForm):
+#     class Meta:
+#         model = Produit
+#         fields = "__all__"
+
+# forms.py
+from django import forms
+from .models import Produit, Matiere_premiere
+
 
 class MatierePremiereForm(forms.ModelForm):
     class Meta:
         model = Matiere_premiere
         fields = "__all__"
 
+class ProduitForm(forms.ModelForm):
+    matieres = forms.ModelMultipleChoiceField(
+        queryset=Matiere_premiere.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+    )
+
+    class Meta:
+        model = Produit
+        fields = ['designation', 'matieres']
+
+    def __init__(self, *args, **kwargs):
+        super(ProduitForm, self).__init__(*args, **kwargs)
+
+        # Ajouter dynamiquement un champ de quantité pour chaque matière première choisie
+        for matiere in Matiere_premiere.objects.all():
+            # Créer un champ de quantité uniquement pour les matières choisies
+            if matiere in self.fields['matieres'].queryset:
+                quantite_key = f'quantite_{matiere.id}'
+                self.fields[quantite_key] = forms.IntegerField(
+                    label=f'Quantité pour {matiere.designation}',
+                    required=True
+                )
+
+    def save(self, commit=True):
+        produit = super().save(commit=False)
+        produit.save()
+
+        matieres = self.cleaned_data['matieres']
+        matiere_quantite = {}
+
+        for matiere in matieres:
+            quantite_key = f'quantite_{matiere.id}'
+            quantite_value = self.cleaned_data.get(quantite_key)
+
+            # Enregistrer la quantité uniquement si elle est fournie
+            if quantite_value is not None:
+                matiere_quantite[matiere.id] = quantite_value
+
+        # Enregistrer les quantités dans le champ matiere_quantite du modèle Produit
+        produit.matiere_quantite = matiere_quantite
+
+        if commit:
+            produit.save()
+
+        return produit
 
 class AchatForm(forms.ModelForm):
     class Meta:
@@ -143,3 +195,12 @@ class Add_Produit_StockForm(forms.Form):
     produit = forms.ModelChoiceField(queryset=Produit.objects.all(), label='Produit')
     centre = forms.ModelChoiceField(queryset=Centre.objects.all(), label='Centre')
     quantite = forms.DecimalField(label='Quantité')
+
+
+class CalculBeneficeForm(forms.Form):
+    date_debut = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    date_fin = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    codecentre = forms.CharField()
+    pourcentage_absence = forms.DecimalField(
+        label="Pourcentage d'absence", min_value=0, max_value=100
+    )

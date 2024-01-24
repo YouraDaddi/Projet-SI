@@ -63,11 +63,12 @@ path('paiement/delete/<int:pk>/', views.paiement_delete, name='paiement_delete')
 
 
 
-
-path("", views.home, name="home"),
-path("mag/", views.afficher_BD, name="magasin"),
-path("mag/editer/<int:pk>", views.edit_BD, name="editer"),
-path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
+#-----------Affichage home ----------------------
+    path("", views.home, name="home"),
+    path("mag/", views.afficher_BD, name="magasin"),
+    path("mag/editer/<int:pk>", views.edit_BD, name="editer"),
+  #-----------creation / modif / supppression ----------------------
+    path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
     path("editer_employe/<int:pk>/", views.editer_employe, name="create_employe"),
     path("editer_produit/<int:pk>/", views.editer_produit, name="create_produit"),
     path("editer_Fournisseur/<int:pk>/", views.editer_fournisseur, name="inserer"),
@@ -80,6 +81,7 @@ path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
     path("supprimer_centre/<int:pk>/",views.delete_BD,{    "model_name": Centre,},name="supprimer_centre",),
     path("supprimer_employe/<int:pk>/",views.delete_BD,{"model_name": Employe},name="supprimer_employe",),
     path("supprimer_fournisseur/<int:pk>/",views.delete_BD,{"model_name": Fournisseur},name="supprimer_fournisseur",),
+   
     path('reglement_credit_client/<int:vente_id>/', views.reglement_credit_client, name='reglement_credit_client'),
     path("vendre_produit/<int:centre_id>/", views.vendre_produit, name="vendre_produit"),
     path("centre/<int:centre_id>/", views.detail_centre, name="centre"),
@@ -91,9 +93,14 @@ path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
     path('client/<int:client_id>/', views.detail_client, name='client_detail'),
     path('vente/<int:vente_id>/supprimer/', views.supprimer_vente, name='supprimer_vente'),
     path('stock_state/<int:centre_id>/', views.stock_state, name='stock_state'),
-    path('add_produit_to_stock/<int:centre_id>/', views.add_produit_to_stock, name='Produit'),
+#     path('add_produit_to_stock/<int:centre_id>/', views.add_produit_to_stock, name='Produit'),
     path('calcul_ventes_nettes/<int:centre_id>/', views.calcul_ventes_nettes, name='calcul_ventes_nettes'),
+    path('calcul_benefice/<int:centre_id>/',  views.calcul_benefice, name='calcul_benefice'),
+    # Add this to your urlpatterns in urls.py
+    path('detail_produit/<int:pk>/', views.detail_produit, name='detail_produit'),
+   
 
 #-------------SECTION  5----
 path('analyze-achats/', views.analyze_achats, name='analyze_achats'),
-path('dashboard_ventes/', views.analyze_ventes, name='dashboard_ventes'),]
+path('dashboard_ventes/', views.analyze_ventes, name='dashboard_ventes'),
+]

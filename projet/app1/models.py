@@ -29,12 +29,12 @@ class Employe(models.Model):
 
 class Matiere_premiere(models.Model):
     designation = models.CharField(max_length=100)
-
+ 
 class Produit(models.Model):
     designation = models.CharField(max_length=100)
+    matiere_quantite = models.JSONField(null=True, blank=True)
     
-
-
+     
 class Achat(models.Model):
     fournisseur = models.ForeignKey(Fournisseur, on_delete=models.CASCADE)
     matiere = models.ForeignKey(Matiere_premiere, on_delete=models.CASCADE, null=True)
@@ -84,11 +84,6 @@ class Stock(models.Model):
     fournisseur  = models.ForeignKey(Fournisseur, on_delete=models.CASCADE)
     date_achat = models.DateField(null=True)
     prix = models.DecimalField(max_digits=10, decimal_places=2)
-
-
-
-
-
 
 
 class stock_Produit(models.Model):
