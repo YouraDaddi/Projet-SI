@@ -2,7 +2,6 @@ from django.shortcuts import render , redirect
 from .models import Centre , Produit , Client , Fournisseur , Employe ,  Achat, Reglement ,Vente , Transfert ,paiementcredit ,Stock,Matiere_premiere
 from .forms import FournisseurForm , CentreForm , ClientForm , EmployeForm , ProduitForm , AchatForm, ReglementForm , PaiementForm ,VenteForm , PaiementCreditForm , TransfertForm ,PaiementClientForm ,StockForm,MatierePremiereForm
 from django.db import models
-from django.contrib import messages
 
 # ------------------------------------ Fonction de MAJ sur toutes les tables ------------------------------------
 
@@ -62,7 +61,7 @@ def fournisseur_create_achat(request):
         form = FournisseurForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('acheter_matiere')
+            return redirect('ajouter_achat')
     else:
         form = FournisseurForm()
     return render(request, 'fournisseur_form.html', {'form': form})
@@ -124,7 +123,7 @@ def matiere_premiere_create_achat(request):
         form = MatierePremiereForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('acheter_matiere')
+            return redirect('ajouter_achat')
     else:
         form = MatierePremiereForm()
     return render(request, 'matiere_premiere_form.html', {'form': form})
@@ -199,18 +198,48 @@ from django.shortcuts import get_object_or_404
 
 
 
+# def achat_update(request, pk):
+#     achat = get_object_or_404(Achat, pk=pk)
+
+#     if request.method == 'POST':
+#         form = AchatForm(request.POST, instance=achat)
+#         if form.is_valid():
+#             updated_achat = form.save()
+#             # Update Stock instance
+#             stock = Stock.objects.get(matiere=achat.matiere, fournisseur=achat.fournisseur,date_achat=achat.date_achat)
+#             stock.quantite += (updated_achat.quantite-achat.quantite)
+#             stock.prix = updated_achat.prix_unitaire_HT
+#             stock.save()
+#             return redirect('journal_achat')
+#     else:
+#         form = AchatForm(instance=achat)
+
+#     return render(request, 'update_achat.html', {'form': form, 'achat': achat})
+
+
+from django.core.exceptions import ObjectDoesNotExist
+
 def achat_update(request, pk):
+    message=''
     achat = get_object_or_404(Achat, pk=pk)
+
+    try:
+        stock = Stock.objects.get(matiere=achat.matiere, fournisseur=achat.fournisseur, date_achat=achat.date_achat)
+    except Stock.DoesNotExist:
+        # Handle the case where there is no corresponding Stock instance
+        message = "Cette matière n'est plus disponible. Vous ne pouvez pas la modifier."
+        return render(request, 'update_achat.html', {'message': message, 'achat': achat})
 
     if request.method == 'POST':
         form = AchatForm(request.POST, instance=achat)
         if form.is_valid():
             updated_achat = form.save()
+            
             # Update Stock instance
-            stock = Stock.objects.get(matiere=achat.matiere, fournisseur=achat.fournisseur,date_achat=achat.date_achat)
-            stock.quantite += (updated_achat.quantite-achat.quantite)
+            stock.quantite += (updated_achat.quantite - achat.quantite)
             stock.prix = updated_achat.prix_unitaire_HT
             stock.save()
+            
             return redirect('journal_achat')
     else:
         form = AchatForm(instance=achat)
@@ -432,7 +461,7 @@ def ajouter_achat(request):
             request.session['selected_fournisseur_id'] = achat.fournisseur.id
             request.session['Reglement_id'] = regler.id
             # redirect to paiement 
-            return redirect('paiement')
+            return redirect('paiement',achat_id=achat.id)
     else:
         form = AchatForm()
 
@@ -442,39 +471,84 @@ def ajouter_achat(request):
 
 
 #--------------payer le fournisseur 
-def payer_fournisseur(request):
-    k=0
+# def payer_fournisseur(request,achat_id):
+#     k=0
+#     message=''
+#     achat=Achat.objects.get(id=achat_id)
+#     if request.method == 'POST':
+#         form = PaiementForm(request.POST)
+#         if form.is_valid():
+#             paiement = form.instance  # Access the form instance without saving
+#             if(achat.montant_achat>=paiement.solde):
+#                 # Retrieve the supplier information from the session
+#                 fournisseur_id = request.session.get('selected_fournisseur_id')
+#                 if fournisseur_id:
+#                     fournisseur = Fournisseur.objects.get(id=fournisseur_id)
+#                     fournisseur.solde -= paiement.solde
+#                     fournisseur.save()
+                
+#                 # Clear the session variable after use
+#                 del request.session['selected_fournisseur_id']
+#                 regler_id=request.session.get('regler_id')
+#                 if regler_id :
+#                     regler = Reglement.objects.get(id=regler_id)
+#                     regler.montant=paiement.solde
+#                     k=regler.achat.montant_achat
+#                     regler.save()
+#             else:
+#                 message='montant tres grant'
+            
+            
+#                 # Redirect after processing
+#             return redirect('journal_achat')
+
+#     else:
+#         form = PaiementForm()
+
+#     return render(request, 'Paiement_fournisseur.html', {'form': form ,'achat':achat})
+
+
+#--------------payer le fournisseur 
+def payer_fournisseur(request, achat_id):
+    k = 0
+    message = ''
+    achat = Achat.objects.get(id=achat_id)
+    
     if request.method == 'POST':
         form = PaiementForm(request.POST)
         if form.is_valid():
-            # Retrieve the supplier information from the session
-            fournisseur_id = request.session.get('selected_fournisseur_id')
-
-            if fournisseur_id:
-                fournisseur = Fournisseur.objects.get(id=fournisseur_id)
-                paiement = form.instance  # Access the form instance without saving
-                fournisseur.solde -= paiement.solde
-                fournisseur.save()
+            paiement = form.instance  # Access the form instance without saving
+            
+            if achat.montant_achat >= paiement.solde:
+                # Montant acceptable, procéder au traitement
+                # Retrieve the supplier information from the session
+                fournisseur_id = request.session.get('selected_fournisseur_id')
                 
-                # Clear the session variable after use
-                del request.session['selected_fournisseur_id']
-            regler_id=request.session.get('regler_id')
-            if regler_id :
-                regler = Reglement.objects.get(id=regler_id)
-                regler.montant=paiement.solde
-                k=regler.achat.montant_achat
-                regler.save()
-                
-                # Redirect after processing
-            return redirect('journal_achat')
-
+                if fournisseur_id:
+                    fournisseur = Fournisseur.objects.get(id=fournisseur_id)
+                    fournisseur.solde -= paiement.solde
+                    fournisseur.save()
+                    
+                    # Clear the session variable after use
+                    del request.session['selected_fournisseur_id']
+                    
+                    regler_id = request.session.get('regler_id')
+                    if regler_id:
+                        regler = Reglement.objects.get(id=regler_id)
+                        regler.montant = paiement.solde
+                        k = regler.achat.montant_achat
+                        regler.save()
+                    
+                    # Redirect after processing
+                    return redirect('journal_achat')
+            else:
+                # Montant trop élevé, afficher un message
+                message = 'Le montant est trop élevé. Veuillez entrer un montant inférieur ou égal au montant de l\'achat.'
+            
     else:
         form = PaiementForm()
-
-    return render(request, 'Paiement_fournisseur.html', {'form': form , 'k':k})
-
-
-
+    
+    return render(request, 'Paiement_fournisseur.html', {'form': form, 'achat': achat, 'message': message})
 
 from django.db.models import Sum, F
 
@@ -567,45 +641,72 @@ def complete_paiement_fournisseur(request):
 #--------------------------------------- VENDRE ----------------------------------------------------
 
 
+from django.db.models import F, Sum
+
 def vendre_matiere(request):
+    message=''
     if request.method == 'POST':
         form = VenteForm(request.POST)
         if form.is_valid():
             vente = form.save(commit=False)
-            vente.montant_total = vente.quantite * vente.prix_unitaire
-            vente.save()
-        
-            clients = Client.objects.get(id=vente.client.id)
-            clients.credit += vente.montant_total 
-            
-            # stocks=Stock.objects.get(produit=vente.produit)
-            # if(stocks.quantite > vente.quantite):
-            #     stocks.quantite -= vente.quantite
-            clients.save()
-            
 
-            # Create a new PaiementCredit instance
-            p=paiementcredit.objects.create(
-                vente=vente,
-                montant=0,
-                date_paiement_credit=vente.date_vente
-            )
-            p.save()
-            
-            # Store the client information and PaiementCredit ID in the session
-            request.session['selected_client_id'] = vente.client.id
-            request.session['p_id'] = p.id
-            
-            return redirect('paiement_credit')
+            # Calculate the total quantity of the specified material in stock
+            matiere_en_stock = Stock.objects.filter(matiere=vente.matiere).aggregate(total_quantite=Sum('quantite'))['total_quantite']
+
+            # Check if the total quantity is sufficient for the sale
+            if matiere_en_stock is not None and matiere_en_stock >= vente.quantite:
+                # Calculate the total amount of the sale
+                vente.montant_total = vente.quantite * vente.prix_unitaire
+                vente.save()
+
+                # Update the quantity in stock after the sale
+                stocks = Stock.objects.filter(matiere=vente.matiere).order_by('date_achat')
+
+                remaining_quantity = vente.quantite
+                for stock in stocks:
+                    if stock.quantite >= remaining_quantity:
+                        # If the stock has enough quantity, update it and break
+                        stock.quantite = F('quantite') - vente.quantite
+                        stock.save()
+                        break
+                    else:
+                        # Update the stock with remaining quantity and continue to the next one
+                        remaining_quantity -= stock.quantite
+                        stock.quantite = 0
+                        stock.save()
+
+                # Update the client's credit
+                client = Client.objects.get(id=vente.client.id)
+                client.credit += vente.montant_total
+                client.save()
+
+                # Create a new PaiementCredit instance
+                p = paiementcredit.objects.create(
+                    vente=vente,
+                    montant=0,
+                    date_paiement_credit=vente.date_vente
+                )
+                p.save()
+
+                # Store the client information and PaiementCredit ID in the session
+                request.session['selected_client_id'] = vente.client.id
+                request.session['p_id'] = p.id
+
+                return redirect('paiement_credit',vente_id=vente.id)
+            else:
+                message= 'Matière insuffisante en stock pour la vente.'
     else:
         form = VenteForm()
 
     clients = Client.objects.all()
     matieres = Matiere_premiere.objects.all()
-    return render(request, 'vendre_matiere.html', {'form': form, 'clients': clients, 'matieres': matieres})
+    return render(request, 'vendre_matiere.html', {'form': form, 'clients': clients, 'matieres': matieres, 'message': message})
 
 
-def paiement_credit(request):
+
+
+def paiement_credit(request,vente_id):
+    vente = Vente.objects.get(id=vente_id)
     term_encour=None
     # Logique pour gérer le paiement crédit du client
     if request.method == 'POST':
@@ -639,7 +740,57 @@ def paiement_credit(request):
     else:
         form = PaiementClientForm()
     
-    return render(request, 'paiement_credit.html', {'form': form , 'term_encour':term_encour})
+    return render(request, 'paiement_credit.html', {'form': form , 'term_encour':term_encour ,'vente': vente})
+
+
+
+# def paiement_credit(request, vente_id):
+#     vente = Vente.objects.get(id=vente_id)
+#     term_encour = None
+#     message = ''
+
+#     # Logique pour gérer le paiement crédit du client
+#     if request.method == 'POST':
+#         form = PaiementClientForm(request.POST)
+#         if form.is_valid():
+#             paiement_credit = form.instance
+
+#             if vente.montant_vente <= paiement_credit.credit:
+#                 # Montant acceptable, procéder au traitement
+#                 # Retrieve the client information from the session
+#                 client_id = request.session.get('selected_client_id')
+
+#                 if client_id:
+#                     client = Client.objects.get(id=client_id)
+#                     client.credit -= paiement_credit.credit
+#                     client.save()
+
+#                     p_id = request.session.get('p_id')
+#                     if p_id:
+#                         p = paiementcredit.objects.get(id=p_id)
+#                         p.montant = paiement_credit.credit
+#                         p.save()
+#                         term_encour = p.vente.montant_vente - p.montant
+
+#                         # Clear the session variable after use
+#                         del request.session['selected_client_id']
+#                 else:
+#                     message = 'Client non sélectionné. Veuillez sélectionner un client.'
+
+#                 # Redirect after processing
+#                 return redirect('journal_ventes')
+
+#             else:
+#                 # Montant trop élevé, afficher un message
+#                 message = 'Le montant du paiement est trop élevé. Veuillez entrer un montant inférieur ou égal au montant de la vente.'
+
+#     else:
+#         form = PaiementClientForm()
+
+#     return render(request, 'paiement_credit.html', {'form': form, 'term_encour': term_encour, 'vente': vente, 'message': message})
+
+
+
 
 
 
@@ -691,20 +842,116 @@ def complete_paiement(request):
 #---------------TRANSFERT 
 
 
+from django.db.models import F, ExpressionWrapper, fields
+
+
+
+# def transferer_matiere(request):
+#     message = ''
+#     if request.method == 'POST':
+#         form = TransfertForm(request.POST)
+#         if form.is_valid():
+#             transfert = form.save(commit=False)
+
+#             # Calculate the total quantity of the specified material in stock
+#             matiere_en_stock = Stock.objects.filter(matiere=transfert.matiere).aggregate(total_quantite=Sum('quantite'))['total_quantite']
+
+#             # Check if the total quantity is sufficient for the transfer
+#             if matiere_en_stock is not None and matiere_en_stock >= transfert.quantite:
+#                 # Calculate the cost of transfer based on the price of the material in stock
+#                 prix_matiere_stock = Stock.objects.filter(matiere=transfert.matiere).first().prix
+#                 transfert.cout_transfert = transfert.quantite * prix_matiere_stock
+
+#                 # Distribute the transfer quantity among the stock rows
+#                 stocks = Stock.objects.filter(matiere=transfert.matiere).order_by('date_achat')
+
+#                 remaining_quantity = transfert.quantite
+#                 for stock in stocks:
+#                     if stock.quantite >= remaining_quantity:
+#                         # If the stock has enough quantity, update it and break
+#                         stock.quantite = F('quantite') - transfert.quantite
+#                         stock.save()
+#                         break
+#                     else:
+#                         # Update the stock with remaining quantity and continue to the next one
+#                         remaining_quantity -= stock.quantite
+#                         stock.quantite = 0
+#                         stock.save()
+
+#                 transfert.save()
+#                 return redirect('journal_transferts')
+#             else:
+#                 message = 'Matière insuffisante en stock pour le transfert.'
+#     else:
+#         form = TransfertForm()
+
+#     return render(request, 'transferer_matiere.html', {'form': form, 'message': message})
+
+
+
+
 def transferer_matiere(request):
+    message = ''
+    
     if request.method == 'POST':
         form = TransfertForm(request.POST)
         if form.is_valid():
             transfert = form.save(commit=False)
-            # transfert.cout_transfert = transfert.produit.prix_unitaire_achat * transfert.quantite
-            # hna lzm f stock ki ndir matiere w prix taeha njib mltm  nchof 3la hssab quantite w la date apres nchof  apres n9dr n3mr le coup
-            transfert.cout_transfert = 0
-            transfert.save()
-            return redirect('journal_transferts')
+
+            # Check if the material is in stock
+            matiere_stock_exists = Stock.objects.filter(matiere=transfert.matiere).exists()
+
+            if matiere_stock_exists:
+                # Calculate the total quantity of the specified material in stock
+                matiere_en_stock = Stock.objects.filter(matiere=transfert.matiere).aggregate(total_quantite=Sum('quantite'))['total_quantite']
+
+                # Check if the total quantity is sufficient for the transfer
+                if matiere_en_stock is not None and matiere_en_stock >= transfert.quantite:
+                    # Calculate the cost of transfer based on the price of the material in stock
+                    prix_matiere_stock = Stock.objects.filter(matiere=transfert.matiere).first().prix
+                    transfert.cout_transfert = transfert.quantite * prix_matiere_stock
+
+                    # Distribute the transfer quantity among the stock rows
+                    stocks = Stock.objects.filter(matiere=transfert.matiere).order_by('date_achat')
+
+                    remaining_quantity = transfert.quantite
+                    for stock in stocks:
+                        if stock.quantite >= remaining_quantity:
+                            # If the stock has enough quantity, update it and break
+                            stock.quantite = F('quantite') - transfert.quantite
+                            stock.save()
+
+                            # Update the stock quantity in stock_Matiere
+                            stock_matiere_entry, created = stock_Matiere.objects.get_or_create(
+                                Matiere_premiere=transfert.matiere,
+                                centre=transfert.centre_dest,
+                                defaults={'quantite': transfert.quantite}
+                            )
+                            if not created:
+                                stock_matiere_entry.quantite = F('quantite') + transfert.quantite
+                                stock_matiere_entry.save()
+
+                            break
+                        else:
+                            # Update the stock with remaining quantity and continue to the next one
+                            remaining_quantity -= stock.quantite
+                            stock.quantite = 0
+                            stock.save()
+
+                    transfert.save()
+                    return redirect('journal_transferts')
+                else:
+                    message = 'Matière insuffisante en stock pour le transfert.'
+            else:
+                message = 'Matière non disponible en stock.'
     else:
         form = TransfertForm()
 
-    return render(request, 'transferer_matiere.html', {'form': form})
+    return render(request, 'transferer_matiere.html', {'form': form, 'message': message})
+
+
+
+
 
 
 def journal_transferts(request):
@@ -739,6 +986,8 @@ def etat_stock(request):
     # total_transfert = sum(transfert.cout_transfert for transfert in Transfert.objects.all())
     
     return render(request, 'etat_stock.html', {'stocks': stocks ,'total':total })
+
+
 
 
 
@@ -790,6 +1039,12 @@ def delete_stock(request, stock_id):
 
 
 
+def supprimer_stocks_zero(request):
+    # Supprimer les stocks avec une quantité égale à zéro
+    Stock.objects.filter(quantite=0).delete()
+    
+    return redirect('etat_stock')  
+
 #-----------------------------SECTION 05 ------------------------------
 
 from django.db.models import Sum, F
@@ -825,20 +1080,13 @@ def analyze_achats(request):
     plt.xlabel('Month')
     plt.ylabel('Total Achats')
 
-    # Save the plot to a BytesIO object
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
-
-    # Convert the BytesIO object to base64 for embedding in HTML
-    img_data = base64.b64encode(img_buffer.getvalue()).decode('utf-8')
-
+    
     # Render the data in the template
     context = {
         'monthly_total_achats': monthly_total_achats,
         'monthly_percentage_change': monthly_percentage_change,
         'top_fournisseurs': top_fournisseurs,
-        'chart_image': img_data,
+        
     }
 
     return render(request, 'dashboard.html', context)
