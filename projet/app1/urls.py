@@ -5,13 +5,13 @@ from . import views
 
 urlpatterns = [ 
         # achat
-# path('acheter_matiere/create_fournisseur/', views.fournisseur_create_achat, name='fournisseur_create_achat'),
-# path('acheter_matiere/create_mp/', views.matiere_premiere_create_achat, name='matiere_premiere_create_achat'),
+path('acheter_matiere/create_fournisseur/', views.fournisseur_create_achat, name='fournisseur_create_achat'),
+path('acheter_matiere/create_mp/', views.matiere_premiere_create_achat, name='matiere_premiere_create_achat'),
 # path('delete_achat/<int:achat_id>/', views.delete_achat, name='delete_achat'),
 # path('generate_journal_achat_pdf/', views.generate_journal_achat_pdf, name='generate_journal_achat_pdf'),
 path('ajouter_achat/', views.ajouter_achat, name='ajouter_achat'),
 path('journal_achat/', views.journal_achat, name='journal_achat'),
-path('paiement/', views.payer_fournisseur, name='paiement'),
+path('paiement/<int:achat_id>', views.payer_fournisseur, name='paiement'),
 path('complete_paiement_fournisseur/', views.complete_paiement_fournisseur, name='complete_paiement_fournisseur'),
 path('ajouter_achat/paiement/<int:achat_id>/', views.liste_paiement_achat, name='liste_paiement_achat'),
 path('ajouter_achat/paiement/update/<int:pk>/', views.paiement_fournisseur_update, name='paiement_fournisseur_update'),
@@ -38,6 +38,7 @@ path('fournisseurs/delete/<int:pk>/', views.fournisseur_delete, name='fournisseu
 path('etat_stock/', views.etat_stock, name='etat_stock'),
 path('generate_stock_pdf/', views.generate_stock_pdf, name='generate_stock_pdf'),
 path('etat_stock/delete_stock/<int:stock_id>/', views.delete_stock, name='delete_stock'),
+path('supprimer_stocks_zero/', views.supprimer_stocks_zero, name='supprimer_stocks_zero'),
         #matiere premiere
 path('matiere_premiere_list/', views.matiere_premiere_list, name='matiere_premiere_list'),
 path('matieres_premieres/create/', views.matiere_premiere_create, name='matiere_premiere_create'),
@@ -62,12 +63,12 @@ path('paiement/delete/<int:pk>/', views.paiement_delete, name='paiement_delete')
 #---------------Section 2-3-4----
 
 
-
-
-path("", views.home, name="home"),
-path("mag/", views.afficher_BD, name="magasin"),
-path("mag/editer/<int:pk>", views.edit_BD, name="editer"),
-path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
+#-----------Affichage home ----------------------
+    path("", views.home, name="home"),
+    path("mag/", views.afficher_BD, name="magasin"),
+    path("mag/editer/<int:pk>", views.edit_BD, name="editer"),
+  #-----------creation / modif / supppression ----------------------
+    path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
     path("editer_employe/<int:pk>/", views.editer_employe, name="create_employe"),
     path("editer_produit/<int:pk>/", views.editer_produit, name="create_produit"),
     path("editer_Fournisseur/<int:pk>/", views.editer_fournisseur, name="inserer"),
@@ -77,9 +78,10 @@ path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
     path("mag/insertClient/", views.create_client, name="inserer_Client"),
     path("supprimer_client/<int:pk>/",views.delete_BD,{"model_name": Client},name="supprimer_client",),
     path("supprimer_produit/<int:pk>/",views.delete_BD,{"model_name": Produit},name="supprimer_produit",),
-    path("supprimer_centre/<int:pk>/",views.delete_BD,{    "model_name": Centre,},name="supprimer_centre",),
+    path("supprimer_centre/<int:pk>/",views.delete_BD,{"model_name": Centre,},name="supprimer_centre",),
     path("supprimer_employe/<int:pk>/",views.delete_BD,{"model_name": Employe},name="supprimer_employe",),
     path("supprimer_fournisseur/<int:pk>/",views.delete_BD,{"model_name": Fournisseur},name="supprimer_fournisseur",),
+   
     path('reglement_credit_client/<int:vente_id>/', views.reglement_credit_client, name='reglement_credit_client'),
     path("vendre_produit/<int:centre_id>/", views.vendre_produit, name="vendre_produit"),
     path("centre/<int:centre_id>/", views.detail_centre, name="centre"),
@@ -93,7 +95,18 @@ path("editer_client/<int:pk>/", views.editer_client, name="inserer_Client"),
     path('stock_state/<int:centre_id>/', views.stock_state, name='stock_state'),
     path('add_produit_to_stock/<int:centre_id>/', views.add_produit_to_stock, name='Produit'),
     path('calcul_ventes_nettes/<int:centre_id>/', views.calcul_ventes_nettes, name='calcul_ventes_nettes'),
+    path('calculer_benefice/<int:centre_id>/', views.calculer_benefice, name='calculer_benefice'),
+   
+    path('detail_produit/<int:pk>/', views.detail_produit, name='detail_produit'),
+    path('journal_transferts-centre/<int:centre_id>/', views.journal_transfert_c, name='journal_transferts'),
+
 
 #-------------SECTION  5----
 path('analyze-achats/', views.analyze_achats, name='analyze_achats'),
-path('dashboard_ventes/', views.analyze_ventes, name='dashboard_ventes'),]
+   path('dashboard_ventes/', views.dashboard_ventes, name='dashboard_ventes'),
+    path('vente_data/', views.vente_data, name='vente_data'),
+    path('taux_evolution_benefice/', views.taux_evolution_benefice, name='taux_evolution_benefice'),
+    path('top_clients/', views.top_clients, name='top_clients'),
+    path('best_selling_products/', views.best_selling_products, name='best_selling_products'),
+
+]
