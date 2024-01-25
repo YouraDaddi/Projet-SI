@@ -44,31 +44,46 @@
       </tr>
     </thead>
     <tbody>
+
+      
       {% for employe in employes %}
-        {% for paiement in today_paiements %}
+ 
+      <tr>
+        <td><a href="{% url 'detail_employe' employe.id %}">{{ employe.id }}</a></td>
+        <td>{{ employe.nom }}</td>
+        <td>          
+          <form method="post" action="{% url 'modify_absence' employe.id %}">
+          {% csrf_token %}
+          <button type="submit" class="{% if paiement.absence %}absent{% else %}present{% endif %}">
+              ABSENCE
+          </button>
+        </form>
+      </td>
+      <td>
+        {% if not paiement.absence %}
+          <button><a href="{% url 'paiement_employe' employe.id %}">Payer</a></button>
+        {% endif %}
+      </td>
+        <td>
+          {% for paiement in today_paiements %}
+          
           {% if paiement.employe.id == employe.id %}
-            <tr>
-              <td><a href="{% url 'detail_employe' employe.id %}">{{ employe.id }}</a></td>
-              <td>{{ employe.nom }}</td>
-              <td>
-                <form method="post" action="{% url 'modify_absence' employe.id %}">
-                  {% csrf_token %}
-                  <button type="submit" class="{% if paiement.absence %}absent{% else %}present{% endif %}">
-                      ABSENCE
-                  </button>
-                </form>
-              </td>
-              <td>
-                {% if not paiement.absence %}
-                  <button><a href="{% url 'paiement_employe' employe.id %}">Payer</a></button>
-                {% endif %}
-              </td>
-            </tr>
-          {% endif %}
-        {% endfor %}
-      {% endfor %}
+          <form method="post" action="{% url 'modify_absence' employe.id %}">
+            {% csrf_token %}
+            <button type="submit" class="{% if paiement.absence %}absent{% else %}present{% endif %}">
+                ABSENCE
+            </button>
+          </form>
+        </td>
+      </tr>
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+    
     </tbody>
   </table>
+  
+
   
   <br />
 

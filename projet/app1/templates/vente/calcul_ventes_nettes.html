@@ -6,24 +6,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calcul des ventes nettes</title>
-    <link rel="stylesheet" href="{% static 'css/css.css' %}">
-
+    <link rel="stylesheet" href="{% static 'css/css.css' %}" />
   </head>
   <body>
     <h3>Calcul des ventes nettes</h3>
     <form method="post" action="">
-      {% csrf_token %}
-      {{ form.date_debut.label_tag }}
-      <input type="date" name="{{ form.date_debut.name }}" value="{{ form.date_debut.value }}">
+      {% csrf_token %} {{ form.date_debut.label_tag }}
+      <input
+        type="date"
+        name="{{ form.date_debut.name }}"
+        value="{{ form.date_debut.value }}"
+      />
       {{ form.date_fin.label_tag }}
-      <input type="date" name="{{ form.date_fin.name }}" value="{{ form.date_fin.value }}">
+      <input
+        type="date"
+        name="{{ form.date_fin.name }}"
+        value="{{ form.date_fin.value }}"
+      />
       <button type="submit">Calculer</button>
       <!-- Bouton "Calculer" pour soumettre le formulaire -->
     </form>
-
-    <!-- Bouton supplémentaire qui redirige vers un autre formulaire -->
-    <a href="{% url 'centre' centre.id %}">
-      <button>Centre</button>
-    </a>
   </body>
 </html>

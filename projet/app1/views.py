@@ -1291,6 +1291,7 @@ def detail_centre(request, centre_id):
         },
     )
 
+
 def detail_produit(request, pk):
     produit = get_object_or_404(Produit, pk=pk)
     matiere_quantite_info = []
